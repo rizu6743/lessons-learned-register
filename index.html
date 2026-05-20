@@ -792,6 +792,53 @@
       filter: brightness(1.2);
     }
 
+    /* ===== INLINE ADD DROPDOWN ===== */
+    .inline-add-field {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .inline-add-field input {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .inline-add-field button {
+      padding: 8px 12px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .inline-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .inline-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(102,126,234,0.12) 0%, rgba(118,75,162,0.12) 100%);
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid rgba(102,126,234,0.2);
+    }
+
+    .inline-chip button {
+      padding: 0;
+      background: transparent;
+      color: var(--red);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
     /* ===== MODAL ===== */
     .modal-backdrop {
       position: fixed;
@@ -938,6 +985,9 @@
       <label>Impact Level</label>
       <select id="impactFilter" onchange="render()"></select>
 
+      <label>Fitout Type</label>
+      <select id="fitoutTypeFilter" onchange="render()"></select>
+
       <label>Project Type</label>
       <select id="projectTypeFilter" onchange="render()"></select>
 
@@ -972,7 +1022,6 @@
 
       <div style="display:flex; gap:8px; margin-top:16px;">
         <button class="secondary" style="width:100%;" onclick="resetFilters()">🔄 Reset</button>
-        <button class="green" style="width:100%;" onclick="loadDemoData()">📊 Demo Data</button>
       </div>
     </aside>
 
@@ -1060,6 +1109,7 @@
                 <th>Why it is a Lesson</th>
                 <th>What is to be Done</th>
                 <th>Project Name</th>
+                <th>Fitout Type</th>
                 <th>Project Type</th>
                 <th>Source</th>
                 <th>Tags</th>
@@ -1099,9 +1149,37 @@
             <label>Category</label>
             <select id="category" multiple required></select>
           </div>
+          <div class="full">
+            <label>Add New Category (Optional)</label>
+            <div class="inline-add-field">
+              <input id="newCategory" type="text" placeholder="Type new category..." />
+              <button type="button" class="blue" onclick="addNewCategory()" style="width: auto;">+ Add</button>
+            </div>
+            <div id="newCategoryChips" class="inline-chips"></div>
+          </div>
+          <div>
+            <label>Fitout Type</label>
+            <select id="fitoutType" required></select>
+          </div>
+          <div class="full">
+            <label>Add New Fitout Type (Optional)</label>
+            <div class="inline-add-field">
+              <input id="newFitoutType" type="text" placeholder="Type new fitout type..." />
+              <button type="button" class="blue" onclick="addNewFitoutType()" style="width: auto;">+ Add</button>
+            </div>
+            <div id="newFitoutTypeChips" class="inline-chips"></div>
+          </div>
           <div>
             <label>Project Type</label>
             <select id="projectType" required></select>
+          </div>
+          <div class="full">
+            <label>Add New Project Type (Optional)</label>
+            <div class="inline-add-field">
+              <input id="newProjectType" type="text" placeholder="Type new project type..." />
+              <button type="button" class="blue" onclick="addNewProjectType()" style="width: auto;">+ Add</button>
+            </div>
+            <div id="newProjectTypeChips" class="inline-chips"></div>
           </div>
           <div class="full">
             <label>Lesson Learned</label>
@@ -1176,13 +1254,14 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'fitout_lessons_learned_register_v2';
-    const OPTIONS_KEY = 'fitout_lessons_dropdown_options_v2';
+    const STORAGE_KEY = 'fitout_lessons_learned_register_v3';
+    const OPTIONS_KEY = 'fitout_lessons_dropdown_options_v3';
 
     const defaultOptions = {
       category: ['Mistake', 'Laziness', 'Assumption', 'Missing Scope', 'Wrong Quantity', 'Supplier Issue', 'Drawing Gap', 'Specification Gap', 'Commercial Risk', 'Coordination Failure'],
       impactLevel: ['Low', 'Medium', 'High', 'Critical'],
-      projectType: ['Tender', 'Live Project', 'Variation', 'Mock-Up', 'Design & Build', 'Post Tender Clarification', 'Handover'],
+      fitoutType: ['Commercial', 'F&B', 'Residential', 'Retail', 'Hospitality', 'Health Care'],
+      projectType: ['Traditional Tender', 'Design and Build', 'Tender without BOQ'],
       source: ['Self Review', 'Team Member', 'Client Comment', 'Consultant Comment', 'Site Visit', 'Matterport', 'BOQ Review', 'Drawing Review', 'Supplier Quote', 'Subcontractor Feedback'],
       tags: ['Matterport', 'BOQ Quantity', 'Drawing Check', 'Site Condition', 'RFI', 'PTC', 'VE', 'Nominated Supplier', 'Lead Time', 'Existing Condition', 'Builders Work'],
       trade: ['Common', 'Civil Works', 'Joinery', 'Ceiling', 'Flooring', 'Wall Finish', 'MEP', 'ELV', 'Lighting', 'Glass & Metal', 'Loose Furniture', 'Signage', 'Waterproofing'],
@@ -1195,12 +1274,11 @@
     let options = loadOptions();
     let lessons = loadLessons();
     let statusChartInstance = null;
-
-    if (!localStorage.getItem('fitout_lessons_demo_cleanup_done_v2')) {
-      lessons = [];
-      persistLessons();
-      localStorage.setItem('fitout_lessons_demo_cleanup_done_v2', 'yes');
-    }
+    let tempNewItems = {
+      category: [],
+      fitoutType: [],
+      projectType: []
+    };
 
     function loadOptions() {
       return JSON.parse(localStorage.getItem(OPTIONS_KEY) || JSON.stringify(defaultOptions));
@@ -1251,6 +1329,7 @@
     function populateAllSelects() {
       fillSelect('categoryFilter', options.category, true);
       fillSelect('impactFilter', options.impactLevel, true);
+      fillSelect('fitoutTypeFilter', options.fitoutType, true);
       fillSelect('projectTypeFilter', options.projectType, true);
       fillSelect('sourceFilter', options.source, true);
       fillSelect('tradeFilter', options.trade, true);
@@ -1262,6 +1341,7 @@
 
       fillSelect('category', options.category);
       fillSelect('impactLevel', options.impactLevel);
+      fillSelect('fitoutType', options.fitoutType);
       fillSelect('projectType', options.projectType);
       fillSelect('source', options.source);
       fillSelect('tags', options.tags);
@@ -1294,6 +1374,7 @@
       const search = document.getElementById('searchFilter').value.toLowerCase().trim();
       const category = document.getElementById('categoryFilter').value;
       const impact = document.getElementById('impactFilter').value;
+      const fitoutType = document.getElementById('fitoutTypeFilter').value;
       const projectType = document.getElementById('projectTypeFilter').value;
       const source = document.getElementById('sourceFilter').value;
       const trade = document.getElementById('tradeFilter').value;
@@ -1311,6 +1392,7 @@
         if (search && !allText.includes(search)) return false;
         if (category !== 'all' && !(l.category || []).includes(category)) return false;
         if (impact !== 'all' && l.impactLevel !== impact) return false;
+        if (fitoutType !== 'all' && l.fitoutType !== fitoutType) return false;
         if (projectType !== 'all' && l.projectType !== projectType) return false;
         if (source !== 'all' && l.source !== source) return false;
         if (trade !== 'all' && !(l.trade || []).includes(trade)) return false;
@@ -1324,7 +1406,7 @@
         if (quick === 'high-risk' && !['High', 'Critical'].includes(l.impactLevel)) return false;
         if (quick === 'open-action' && !['Open', 'In Progress', 'Requires Management Action'].includes(l.status)) return false;
         if (quick === 'matterport' && !(l.tags || []).includes('Matterport') && l.source !== 'Matterport') return false;
-        if (quick === 'tender' && l.projectType !== 'Tender') return false;
+        if (quick === 'tender' && !['Traditional Tender', 'Design and Build', 'Tender without BOQ'].includes(l.projectType)) return false;
         return true;
       });
 
@@ -1527,6 +1609,7 @@
           <td>${escapeHtml(l.whyLesson)}</td>
           <td>${escapeHtml(l.toBeDone)}</td>
           <td>${escapeHtml(l.projectName)}</td>
+          <td>${pill(l.fitoutType,'fitoutType')}</td>
           <td>${pill(l.projectType,'projectType')}</td>
           <td>${pill(l.source,'source')}</td>
           <td>${(l.tags || []).map(x => pill(x,'tag')).join('')}</td>
@@ -1545,15 +1628,91 @@
       document.getElementById('lessonId').value = '';
       document.getElementById('date').value = new Date().toISOString().slice(0,10);
       document.getElementById('entryTitle').textContent = '📝 New Lesson';
+      tempNewItems = { category: [], fitoutType: [], projectType: [] };
+      clearInlineChips();
       if (id) editLesson(id);
       document.getElementById('entryModal').style.display = 'flex';
     }
 
-    function closeEntryModal() { document.getElementById('entryModal').style.display = 'none'; }
+    function closeEntryModal() { 
+      document.getElementById('entryModal').style.display = 'none'; 
+      tempNewItems = { category: [], fitoutType: [], projectType: [] };
+    }
+
+    function clearInlineChips() {
+      document.getElementById('newCategoryChips').innerHTML = '';
+      document.getElementById('newFitoutTypeChips').innerHTML = '';
+      document.getElementById('newProjectTypeChips').innerHTML = '';
+    }
+
+    function addNewCategory() {
+      const input = document.getElementById('newCategory');
+      const value = input.value.trim();
+      if (!value) return;
+      if (!tempNewItems.category.includes(value)) {
+        tempNewItems.category.push(value);
+      }
+      input.value = '';
+      renderInlineChips();
+    }
+
+    function addNewFitoutType() {
+      const input = document.getElementById('newFitoutType');
+      const value = input.value.trim();
+      if (!value) return;
+      if (!tempNewItems.fitoutType.includes(value)) {
+        tempNewItems.fitoutType.push(value);
+      }
+      input.value = '';
+      renderInlineChips();
+    }
+
+    function addNewProjectType() {
+      const input = document.getElementById('newProjectType');
+      const value = input.value.trim();
+      if (!value) return;
+      if (!tempNewItems.projectType.includes(value)) {
+        tempNewItems.projectType.push(value);
+      }
+      input.value = '';
+      renderInlineChips();
+    }
+
+    function removeInlineItem(type, value) {
+      tempNewItems[type] = tempNewItems[type].filter(v => v !== value);
+      renderInlineChips();
+    }
+
+    function renderInlineChips() {
+      document.getElementById('newCategoryChips').innerHTML = tempNewItems.category.map(v => 
+        `<span class="inline-chip">${escapeHtml(v)} <button type="button" onclick="removeInlineItem('category', '${escapeHtml(v).replace(/'/g, "\\'")}')">×</button></span>`
+      ).join('');
+      
+      document.getElementById('newFitoutTypeChips').innerHTML = tempNewItems.fitoutType.map(v => 
+        `<span class="inline-chip">${escapeHtml(v)} <button type="button" onclick="removeInlineItem('fitoutType', '${escapeHtml(v).replace(/'/g, "\\'")}')">×</button></span>`
+      ).join('');
+      
+      document.getElementById('newProjectTypeChips').innerHTML = tempNewItems.projectType.map(v => 
+        `<span class="inline-chip">${escapeHtml(v)} <button type="button" onclick="removeInlineItem('projectType', '${escapeHtml(v).replace(/'/g, "\\'")}')">×</button></span>`
+      ).join('');
+    }
 
     function saveLesson(e) {
       e.preventDefault();
       const id = document.getElementById('lessonId').value || crypto.randomUUID();
+      
+      // Add new items to options if they don't exist
+      tempNewItems.category.forEach(v => {
+        if (!options.category.includes(v)) options.category.push(v);
+      });
+      tempNewItems.fitoutType.forEach(v => {
+        if (!options.fitoutType.includes(v)) options.fitoutType.push(v);
+      });
+      tempNewItems.projectType.forEach(v => {
+        if (!options.projectType.includes(v)) options.projectType.push(v);
+      });
+      saveOptions();
+
       const entry = {
         id,
         date: document.getElementById('date').value,
@@ -1563,6 +1722,7 @@
         whyLesson: document.getElementById('whyLesson').value.trim(),
         toBeDone: document.getElementById('toBeDone').value.trim(),
         projectName: document.getElementById('projectName').value.trim(),
+        fitoutType: document.getElementById('fitoutType').value,
         projectType: document.getElementById('projectType').value,
         source: document.getElementById('source').value,
         tags: selectedValues('tags'),
@@ -1586,7 +1746,7 @@
       if (!l) return;
       document.getElementById('entryTitle').textContent = '✏️ Edit Lesson';
       document.getElementById('lessonId').value = l.id;
-      ['date','impactLevel','lessonLearned','whyLesson','toBeDone','projectName','projectType','source','rootCause','phase','status','responsible','costImpact','checklistItem'].forEach(k => {
+      ['date','impactLevel','lessonLearned','whyLesson','toBeDone','projectName','fitoutType','projectType','source','rootCause','phase','status','responsible','costImpact','checklistItem'].forEach(k => {
         const el = document.getElementById(k);
         if (el) el.value = l[k] || '';
       });
@@ -1605,7 +1765,7 @@
 
     function resetFilters() {
       ['searchFilter','dateFrom','dateTo'].forEach(id => document.getElementById(id).value = '');
-      ['categoryFilter','impactFilter','projectTypeFilter','sourceFilter','tradeFilter','tagFilter','statusFilter','responsibleFilter','phaseFilter','rootCauseFilter'].forEach(id => document.getElementById(id).value = 'all');
+      ['categoryFilter','impactFilter','fitoutTypeFilter','projectTypeFilter','sourceFilter','tradeFilter','tagFilter','statusFilter','responsibleFilter','phaseFilter','rootCauseFilter'].forEach(id => document.getElementById(id).value = 'all');
       document.getElementById('quickFilter').value = 'all';
       document.getElementById('sortBy').value = 'date-desc';
       render();
@@ -1620,7 +1780,7 @@
 
     function renderDropdownAdmin() {
       const labels = {
-        category: 'Category', impactLevel: 'Impact Level', projectType: 'Project Type', source: 'Source', tags: 'Tags', trade: 'Trade', rootCause: 'Root Cause', phase: 'Project Phase', status: 'Status', responsible: 'Responsible Person / Team'
+        category: 'Category', impactLevel: 'Impact Level', fitoutType: 'Fitout Type', projectType: 'Project Type', source: 'Source', tags: 'Tags', trade: 'Trade', rootCause: 'Root Cause', phase: 'Project Phase', status: 'Status', responsible: 'Responsible Person / Team'
       };
       document.getElementById('dropdownAdmin').innerHTML = Object.keys(defaultOptions).map(key => `
         <div class="card" style="box-shadow:none; border-radius:14px; border: 1px solid var(--line);">
@@ -1651,9 +1811,9 @@
     }
 
     function exportCSV() {
-      const headers = ['Date','Category','Impact Level','Lesson Learned','Why is it a Lesson','What is to be Done','Project Name','Project Type','Source','Tags','Trade','Root Cause','Phase','Status','Responsible','Cost Impact','Checklist Item'];
+      const headers = ['Date','Category','Impact Level','Lesson Learned','Why is it a Lesson','What is to be Done','Project Name','Fitout Type','Project Type','Source','Tags','Trade','Root Cause','Phase','Status','Responsible','Cost Impact','Checklist Item'];
       const rows = getFilteredLessons().map(l => [
-        l.date, (l.category||[]).join('; '), l.impactLevel, l.lessonLearned, l.whyLesson, l.toBeDone, l.projectName, l.projectType, l.source, (l.tags||[]).join('; '), (l.trade||[]).join('; '), l.rootCause, l.phase, l.status, l.responsible, l.costImpact, l.checklistItem
+        l.date, (l.category||[]).join('; '), l.impactLevel, l.lessonLearned, l.whyLesson, l.toBeDone, l.projectName, l.fitoutType, l.projectType, l.source, (l.tags||[]).join('; '), (l.trade||[]).join('; '), l.rootCause, l.phase, l.status, l.responsible, l.costImpact, l.checklistItem
       ]);
       const csv = [headers, ...rows].map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1663,94 +1823,6 @@
       a.download = 'lessons-learned-register.csv';
       a.click();
       URL.revokeObjectURL(url);
-    }
-
-    function loadDemoData() {
-      lessons = [
-        {
-          id: crypto.randomUUID(),
-          date: '2026-02-09',
-          category: ['Mistake', 'Laziness'],
-          impactLevel: 'Low',
-          lessonLearned: 'Always check Matterport survey with drawings.',
-          whyLesson: 'I did not check the Matterport survey for the washroom; scope mentioned replacing the WC ledge wall, but site quantity is different.',
-          toBeDone: '- Check Matterport clearly\n- Do not rely only on BOQ quantity\n- BOQ quantity must always be verified against drawings and site survey',
-          projectName: 'E-4375 - JW Marriott Marquis - Dubai',
-          projectType: 'Tender',
-          source: 'Team Member',
-          tags: ['Matterport', 'BOQ Quantity', 'Site Condition'],
-          trade: ['Civil Works', 'Common'],
-          rootCause: 'No Site Verification',
-          phase: 'Tender Stage',
-          status: 'Converted to Checklist',
-          responsible: 'Estimator',
-          costImpact: 'Potential omission or quantity difference in demolition/replacement of WC ledge wall. Future pricing must verify site quantity before submission.',
-          checklistItem: 'For all refurbishment tenders, cross-check BOQ quantities with Matterport/site survey before final pricing.'
-        },
-        {
-          id: crypto.randomUUID(),
-          date: '2026-02-12',
-          category: ['Assumption', 'Missing Scope'],
-          impactLevel: 'High',
-          lessonLearned: 'Clarify builder\'s work for client direct installation items before pricing final submission.',
-          whyLesson: 'Direct installation items may still require plywood backing, supports, access, containment, coring, making good, or coordination by main contractor.',
-          toBeDone: '- Raise RFI for builder\'s work boundaries\n- Add qualification if response is pending\n- Price minimum known supports separately',
-          projectName: 'E-4406 - HSBC Tower L11 Phase 02',
-          projectType: 'PTC / BAFO',
-          source: 'RFI',
-          tags: ['Builders Work', 'RFI', 'Existing Condition'],
-          trade: ['MEP', 'Civil Works', 'Common'],
-          rootCause: 'Scope Boundary Unclear',
-          phase: 'PTC / BAFO',
-          status: 'Open',
-          responsible: 'MEP Team',
-          costImpact: 'Open-ended builder\'s work may affect cost and programme if not clarified.',
-          checklistItem: 'Never assume client-direct items exclude builder\'s work. Confirm interface responsibility.'
-        },
-        {
-          id: crypto.randomUUID(),
-          date: '2026-02-15',
-          category: ['Supplier Issue'],
-          impactLevel: 'Critical',
-          lessonLearned: 'Verify lead times BEFORE tender submission, not after contract award.',
-          whyLesson: 'Quoted 12-week delivery, but supplier quoted 16 weeks post-award. Caused programme delay and variation claim.',
-          toBeDone: '- Always call supplier directly for lead times\n- Request written confirmation in RFQ\n- Add procurement schedule buffer',
-          projectName: 'E-4412 - Marina Tower Refurb - Abu Dhabi',
-          projectType: 'Live Project',
-          source: 'Client Comment',
-          tags: ['Lead Time', 'Nominated Supplier'],
-          trade: ['Joinery'],
-          rootCause: 'Poor Communication',
-          phase: 'Procurement',
-          status: 'Closed',
-          responsible: 'Senior Estimator',
-          costImpact: 'Programme delay risk: 4 weeks. Potential AED 150,000+ variation exposure.',
-          checklistItem: 'Lead time confirmation must be in writing from supplier, not relying on standard terms.'
-        },
-        {
-          id: crypto.randomUUID(),
-          date: '2026-02-18',
-          category: ['Wrong Quantity'],
-          impactLevel: 'Medium',
-          lessonLearned: 'Floor finish quantities differ between drawings (sqm) and BOQ (rolls/boxes).',
-          whyLesson: 'BOQ listed as "50 rolls of flooring" but drawings showed 320 sqm. Rolls were smaller than expected—pricing off 50 vs 80 rolls needed.',
-          toBeDone: '- Convert all BOQ quantities to metric (sqm, m, no.) against drawings\n- Flag unit mismatches in clarifications\n- Create internal conversion checklist',
-          projectName: 'E-4389 - Dusit Thani Resort Phase 1',
-          projectType: 'Tender',
-          source: 'Drawing Review',
-          tags: ['BOQ Quantity', 'Drawing Check'],
-          trade: ['Flooring', 'Common'],
-          rootCause: 'Over-Reliance on BOQ',
-          phase: 'Tender Stage',
-          status: 'In Progress',
-          responsible: 'QS',
-          costImpact: 'Potential AED 45,000 pricing gap. Correction required in next tender cycle.',
-          checklistItem: 'All BOQ items must be cross-referenced against drawings with unit consistency verified.'
-        }
-      ];
-      persistLessons();
-      render();
-      alert('✅ Demo data loaded! Try filtering and exploring the dashboard.');
     }
 
     populateAllSelects();
