@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lessons Learned Register | Fit-Out Estimation</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #667eea;
+      --primary-dark: #764ba2;
+      --accent: #f093fb;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --red: #dc2626;
+      --red-soft: #fee2e2;
+      --amber: #d97706;
+      --amber-soft: #fef3c7;
+      --green: #059669;
+      --green-soft: #d1fae5;
+      --purple: #7c3aed;
+      --purple-soft: #ede9fe;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 25px 50px rgba(102, 126, 234, 0.15);
+      --radius: 18px;
+      --radius-sm: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #f5f7fb 0%, #e9ecf1 100%);
+      color: var(--ink);
+      overflow: auto;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 32px 24px 24px;
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    header > * { position: relative; z-index: 1; }
+
+    h1 { 
+      margin: 0; 
+      font-size: 36px; 
+      letter-spacing: -0.04em; 
+      font-weight: 800;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .subtitle { 
+      margin-top: 8px; 
+      color: rgba(255,255,255,0.95); 
+      max-width: 900px; 
+      line-height: 1.5; 
+      font-size: 14px; 
+      font-weight: 500;
+    }
+
+    .header-actions { 
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      justify-content: flex-end;
+    }
+
+    /* ===== BUTTONS ===== */
+    button, select, input, textarea { 
+      font: inherit; 
+    }
+
+    button {
+      border: 0;
+      border-radius: var(--radius-sm);
+      padding: 11px 16px;
+      background: var(--ink);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-weight: 700;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    button:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    button:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    button.secondary { 
+      background: rgba(255,255,255,0.95); 
+      color: var(--ink); 
+      border: 1.5px solid var(--line);
+    }
+
+    button.secondary:hover {
+      background: white;
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    }
+
+    button.blue { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    button.blue:hover {
+      box-shadow: 0 10px 28px rgba(102, 126, 234, 0.4);
+    }
+
+    button.danger { 
+      background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    }
+
+    button.danger:hover {
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+    }
+
+    button.green { 
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    button.green:hover {
+      box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    /* ===== LAYOUT ===== */
+    .layout {
+      padding: 24px 24px 24px;
+      display: grid;
+      grid-template-columns: 260px minmax(980px, 1fr);
+      gap: 20px;
+      min-width: 1280px;
+    }
+
+    .panel, .card, .table-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 231, 235, 0.7);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .panel {
+      padding: 16px;
+      height: calc(100vh - 128px);
+      position: sticky;
+      top: 16px;
+      overflow-y: auto;
+      animation: slideInLeft 0.5s ease;
+    }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .panel h2, .section-title { 
+      margin: 0 0 12px; 
+      font-size: 15px; 
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+    }
+
+    label { 
+      display: block; 
+      font-size: 11px; 
+      color: var(--muted); 
+      margin: 10px 0 5px; 
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      background: white;
+      border-radius: 10px;
+      padding: 9px 11px;
+      color: var(--ink);
+      outline: none;
+      font-size: 12px;
+      transition: all 0.25s ease;
+    }
+
+    textarea { 
+      min-height: 88px; 
+      resize: vertical; 
+      line-height: 1.45;
+    }
+
+    input:focus, select:focus, textarea:focus { 
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+      background: rgba(102, 126, 234, 0.02);
+    }
+
+    .form-grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 12px; 
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    .main { 
+      display: grid; 
+      gap: 18px; 
+      min-width: 0;
+      animation: slideInUp 0.5s ease;
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== METRICS ===== */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 14px;
+    }
+
+    .metric {
+      padding: 18px;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
+      border: 1.5px solid rgba(102, 126, 234, 0.1);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+
+    .metric::after {
+      content: "";
+      position: absolute;
+      right: -30px;
+      top: -30px;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, transparent 70%);
+      animation: pulse-metric 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-metric {
+      0%, 100% { transform: scale(0.8); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .metric:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2);
+      border-color: rgba(102, 126, 234, 0.3);
+      background: linear-gradient(135deg, #f0f4ff 0%, rgba(255,255,255,0.98) 100%);
+    }
+
+    .metric small { 
+      color: var(--muted); 
+      font-weight: 700; 
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric strong { 
+      display: block; 
+      margin-top: 8px; 
+      font-size: 28px; 
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+    }
+
+    .metric-icon {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 24px;
+      opacity: 0.15;
+    }
+
+    /* ===== VISUAL GRID ===== */
+    .visual-grid { 
+      display: grid; 
+      grid-template-columns: 0.95fr 0.85fr 1.2fr; 
+      gap: 14px; 
+    }
+
+    .card { 
+      padding: 18px;
+      position: relative;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    /* ===== BARS ===== */
+    .bar-row { 
+      display: grid; 
+      grid-template-columns: 92px 1fr 28px; 
+      gap: 10px; 
+      align-items: center; 
+      margin: 10px 0;
+      transition: all 0.25s ease;
+    }
+
+    .bar-row:hover {
+      transform: translateX(4px);
+    }
+
+    .bar-label { 
+      font-size: 12px; 
+      color: var(--muted); 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+      font-weight: 600;
+    }
+
+    .bar-track { 
+      height: 10px; 
+      background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 100%);
+      border-radius: 999px; 
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .bar-fill { 
+      height: 100%; 
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      transition: width 0.4s ease, filter 0.3s ease;
+    }
+
+    .bar-row:hover .bar-fill {
+      filter: brightness(1.15);
+    }
+
+    .bar-count { 
+      font-size: 12px; 
+      font-weight: 700;
+      color: var(--ink);
+      text-align: right;
+    }
+
+    /* ===== HEATMAP ===== */
+    .heatmap { 
+      display: grid; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 10px;
+    }
+
+    .heat-cell {
+      min-height: 56px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(102, 126, 234, 0.15);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+      padding: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+
+    .heat-cell:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+      border-color: rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    }
+
+    .heat-cell strong { 
+      display: block; 
+      color: var(--ink); 
+      margin-top: 6px; 
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== CHARTS ===== */
+    #categoryChart, #impactChart {
+      max-height: 200px;
+    }
+
+    /* ===== TRADE MENU ===== */
+    .trade-menu {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 14px;
+      min-height: 280px;
+    }
+
+    .trade-menu-large { 
+      min-height: 65vh; 
+    }
+
+    .trade-list {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      padding: 8px;
+    }
+
+    .trade-list-large { 
+      max-height: 65vh; 
+    }
+
+    .trade-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .trade-list::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+
+    .trade-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #667eea, #764ba2);
+      border-radius: 10px;
+    }
+
+    .trade-item {
+      width: 100%;
+      text-align: left;
+      color: var(--ink);
+      background: transparent;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .trade-item:hover {
+      background: rgba(102, 126, 234, 0.08);
+      transform: translateX(4px);
+    }
+
+    .trade-item.active { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    }
+
+    .trade-item span:last-child { 
+      color: var(--muted); 
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .trade-item.active span:last-child {
+      color: rgba(255,255,255,0.9);
+    }
+
+    .trade-detail {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
+    }
+
+    .trade-detail-large { 
+      max-height: 65vh; 
+    }
+
+    .trade-detail::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .trade-detail::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+
+    .trade-detail::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #667eea, #764ba2);
+      border-radius: 10px;
+    }
+
+    .trade-detail h3 { 
+      margin: 0 0 10px; 
+      font-size: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+    }
+
+    .trade-summary-item { 
+      border-top: 1.5px solid var(--line); 
+      padding: 11px 0;
+      transition: all 0.25s ease;
+    }
+
+    .trade-summary-item:hover {
+      background: rgba(102, 126, 234, 0.02);
+      padding: 11px 8px;
+      border-radius: 8px;
+    }
+
+    .trade-summary-item:first-of-type { 
+      border-top: 0; 
+    }
+
+    .trade-summary-item strong { 
+      display: block; 
+      font-size: 13px; 
+      margin-bottom: 5px;
+      color: var(--ink);
+    }
+
+    .trade-summary-item p { 
+      margin: 4px 0; 
+      color: var(--muted); 
+      font-size: 12px; 
+      line-height: 1.4; 
+    }
+
+    /* ===== FILTERS ===== */
+    .filters {
+      display: grid;
+      grid-template-columns: 170px 130px 150px 130px 160px 130px;
+      gap: 10px;
+      padding: 14px;
+      align-items: center;
+      background: linear-gradient(90deg, rgba(102,126,234,0.03) 0%, rgba(118,75,162,0.03) 100%);
+      border-bottom: 1.5px solid var(--line);
+    }
+
+    /* ===== TABLE ===== */
+    .table-card { 
+      overflow: hidden;
+      animation: slideInUp 0.6s ease 0.1s backwards;
+    }
+
+    table { 
+      width: max-content; 
+      min-width: 1680px; 
+      border-collapse: collapse; 
+      font-size: 12px; 
+    }
+
+    thead { 
+      background: linear-gradient(90deg, rgba(102,126,234,0.08) 0%, rgba(118,75,162,0.08) 100%);
+      position: sticky; 
+      top: 0; 
+      z-index: 2;
+    }
+
+    th, td { 
+      padding: 12px 14px; 
+      border-bottom: 1px solid var(--line); 
+      text-align: left; 
+      vertical-align: top; 
+    }
+
+    th { 
+      color: var(--ink);
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 0.04em; 
+      white-space: nowrap;
+      font-weight: 800;
+    }
+
+    tbody tr { 
+      transition: all 0.25s ease;
+      animation: slideInUp 0.4s ease backwards;
+    }
+
+    tbody tr:hover { 
+      background: linear-gradient(90deg, rgba(102,126,234,0.06) 0%, transparent 100%);
+      transform: scale(1.008);
+      box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.08);
+    }
+
+    td:nth-child(4), td:nth-child(5), td:nth-child(6) { 
+      max-width: 220px; 
+    }
+
+    .table-scroll {
+      max-height: 55vh;
+      overflow-y: auto;
+      border-top: 1px solid var(--line);
+    }
+
+    .table-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .table-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #667eea, #764ba2);
+      border-radius: 10px;
+    }
+
+    /* ===== PILLS/BADGES ===== */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      margin: 2px 3px 2px 0;
+      background: #eef2ff;
+      color: #3730a3;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .pill:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .pill.red { 
+      background: var(--red-soft); 
+      color: var(--red); 
+    }
+
+    .pill.amber { 
+      background: var(--amber-soft); 
+      color: var(--amber); 
+    }
+
+    .pill.green { 
+      background: var(--green-soft); 
+      color: var(--green); 
+    }
+
+    .pill.blue { 
+      background: var(--blue-soft); 
+      color: var(--blue); 
+    }
+
+    .pill.purple { 
+      background: var(--purple-soft); 
+      color: var(--purple); 
+    }
+
+    /* ===== ACTIONS ===== */
+    .actions { 
+      display: flex; 
+      gap: 8px;
+    }
+
+    .icon-btn { 
+      padding: 8px 11px; 
+      border-radius: 9px; 
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* ===== DROPDOWN ADMIN ===== */
+    .dropdown-admin { 
+      display: grid; 
+      grid-template-columns: 1fr; 
+      gap: 12px; 
+    }
+
+    .chips { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 8px; 
+      margin-top: 10px;
+    }
+
+    .chip { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 8px; 
+      padding: 7px 11px; 
+      border-radius: 999px; 
+      background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(102,126,234,0.2);
+      transition: all 0.2s ease;
+    }
+
+    .chip:hover {
+      background: linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.15) 100%);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+    }
+
+    .chip button { 
+      padding: 0 4px; 
+      background: transparent; 
+      color: var(--red); 
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .chip button:hover {
+      transform: scale(1.2);
+      filter: brightness(1.2);
+    }
+
+    /* ===== MODAL ===== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.45) 0%, rgba(102,126,234,0.15) 100%);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 20;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      width: min(1000px, 96vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: 0 40px 100px rgba(2, 6, 23, 0.35);
+      animation: slideInCenter 0.3s ease;
+    }
+
+    @keyframes slideInCenter {
+      from { 
+        opacity: 0; 
+        transform: translateY(-20px) scale(0.95);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 16px;
+    }
+
+    .modal-header h2 { 
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty { 
+      padding: 48px 20px; 
+      text-align: center; 
+      color: var(--muted); 
+      font-size: 14px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+      border-radius: 14px;
+      margin: 24px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .empty::before {
+      content: "📊";
+      display: block;
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-bar {
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* ===== MEDIA QUERIES ===== */
+    @media (max-width: 1180px) {
+      header { min-width: 1280px; }
+    }
+
+    @media print {
+      body { background: white; }
+      header, .panel, .visual-grid, .header-actions, .filters { display: none !important; }
+      .layout { display: block; min-width: 0; padding: 0; }
+      .table-scroll { max-height: none; overflow: visible; }
+      table { min-width: 0; width: 100%; font-size: 10px; }
+      th, td { padding: 6px; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #e2e8f0; }
+      header { background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%); }
+      .panel, .card, .table-card { background: rgba(15, 23, 42, 0.8); border-color: rgba(102, 126, 234, 0.2); }
+      input, select, textarea { background: rgba(30, 27, 75, 0.8); color: #e2e8f0; border-color: rgba(102, 126, 234, 0.3); }
+      tbody tr:hover { background: rgba(102, 126, 234, 0.1); }
+      .trade-list { background: rgba(30, 27, 75, 0.6); }
+      .modal { background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.9) 100%); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>📚 Lessons Learned Register</h1>
+      <div class="subtitle">A visual database for fit-out tender mistakes, lazy assumptions, site-survey gaps, quantity errors, supplier lessons, commercial risks, and corrective actions. Built for estimators, QS, and project handover learning.</div>
+    </div>
+    <div class="header-actions">
+      <button class="secondary" onclick="showScreen('register')">📋 Register</button>
+      <button class="secondary" onclick="showScreen('trade')">🏗️ Trade Lessons</button>
+      <button class="secondary" onclick="openSettings()">⚙️ Settings</button>
+      <button class="secondary" onclick="exportCSV()">📥 Export CSV</button>
+      <button class="blue" onclick="openEntryModal()">+ New Lesson</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="panel">
+      <h2>🔍 Filters & Slicers</h2>
+      <label>Search</label>
+      <input id="searchFilter" placeholder="Search lesson, reason, project..." oninput="render()" />
+
+      <label>Category</label>
+      <select id="categoryFilter" onchange="render()"></select>
+
+      <label>Impact Level</label>
+      <select id="impactFilter" onchange="render()"></select>
+
+      <label>Project Type</label>
+      <select id="projectTypeFilter" onchange="render()"></select>
+
+      <label>Source</label>
+      <select id="sourceFilter" onchange="render()"></select>
+
+      <label>Trade</label>
+      <select id="tradeFilter" onchange="render()"></select>
+
+      <label>Tag</label>
+      <select id="tagFilter" onchange="render()"></select>
+
+      <div class="form-grid">
+        <div>
+          <label>Date From</label>
+          <input id="dateFrom" type="date" onchange="render()" />
+        </div>
+        <div>
+          <label>Date To</label>
+          <input id="dateTo" type="date" onchange="render()" />
+        </div>
+      </div>
+
+      <label>Quick View</label>
+      <select id="quickFilter" onchange="render()">
+        <option value="all">All Records</option>
+        <option value="high-risk">⚠️ High / Critical Impact</option>
+        <option value="open-action">📍 Open Corrective Action</option>
+        <option value="matterport">🎥 Matterport Related</option>
+        <option value="tender">🎯 Tender Related</option>
+      </select>
+
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="secondary" style="width:100%;" onclick="resetFilters()">🔄 Reset</button>
+        <button class="green" style="width:100%;" onclick="loadDemoData()">📊 Demo Data</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="metrics">
+        <div class="metric">
+          <div class="metric-icon">📚</div>
+          <small>Total Lessons</small>
+          <strong id="mTotal">0</strong>
+        </div>
+        <div class="metric">
+          <div class="metric-icon">⚠️</div>
+          <small>High Risk</small>
+          <strong id="mHigh">0</strong>
+        </div>
+        <div class="metric">
+          <div class="metric-icon">📍</div>
+          <small>Open Actions</small>
+          <strong id="mOpen">0</strong>
+          <div class="progress-bar"><div class="progress-fill" id="openActionProgress"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-icon">🏗️</div>
+          <small>Trade Lessons</small>
+          <strong id="mTradeLessons">0</strong>
+        </div>
+        <div class="metric">
+          <div class="metric-icon">🎯</div>
+          <small>Top Root Cause</small>
+          <strong id="mTopCause" style="font-size:16px;">-</strong>
+        </div>
+      </section>
+
+      <section class="visual-grid" id="dashboardVisuals">
+        <div class="card">
+          <div class="section-title">📊 Lessons by Category</div>
+          <div id="categoryBars"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">🔥 Impact Heatmap</div>
+          <div class="heatmap" id="impactHeatmap"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">📈 Status Overview</div>
+          <canvas id="statusChart"></canvas>
+        </div>
+      </section>
+
+      <section class="card" id="tradeScreen" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:16px;">
+          <div>
+            <div class="section-title" style="font-size:18px; margin-bottom:4px;">🏗️ Trade Lessons — Cumulative Screen</div>
+            <div style="color:var(--muted); font-size:13px; line-height:1.45; max-width:820px;">Use this screen before pricing, sending supplier/subcontractor inquiries, preparing RFIs, reviewing quotes, or finalizing trade assumptions.</div>
+          </div>
+          <button class="secondary" onclick="showScreen('register')">← Back</button>
+        </div>
+        <div class="trade-menu trade-menu-large">
+          <div class="trade-list trade-list-large" id="tradeLessonList"></div>
+          <div class="trade-detail trade-detail-large" id="tradeLessonDetail"></div>
+        </div>
+      </section>
+
+      <section class="table-card" id="registerTableSection">
+        <div class="filters">
+          <select id="sortBy" onchange="render()">
+            <option value="date-desc">Sort: Latest First</option>
+            <option value="date-asc">Sort: Oldest First</option>
+            <option value="impact-desc">Sort: Highest Impact</option>
+            <option value="project">Sort: Project Name</option>
+          </select>
+          <select id="statusFilter" onchange="render()"></select>
+          <select id="responsibleFilter" onchange="render()"></select>
+          <select id="phaseFilter" onchange="render()"></select>
+          <select id="rootCauseFilter" onchange="render()"></select>
+          <button class="secondary" onclick="print()">🖨️ Print / PDF</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Impact</th>
+                <th>Lesson Learned</th>
+                <th>Why it is a Lesson</th>
+                <th>What is to be Done</th>
+                <th>Project Name</th>
+                <th>Project Type</th>
+                <th>Source</th>
+                <th>Tags</th>
+                <th>Trade</th>
+                <th>Root Cause</th>
+                <th>Status</th>
+                <th>Responsible</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="lessonTable"></tbody>
+          </table>
+          <div class="empty" id="emptyState" style="display:none;">No lessons match the selected filters.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="entryModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="entryTitle">📝 New Lesson</h2>
+        <button class="secondary" onclick="closeEntryModal()">✕ Close</button>
+      </div>
+      <form id="lessonForm" onsubmit="saveLesson(event)">
+        <input type="hidden" id="lessonId" />
+        <div class="form-grid">
+          <div>
+            <label>Date</label>
+            <input id="date" type="date" required />
+          </div>
+          <div>
+            <label>Impact Level</label>
+            <select id="impactLevel" required></select>
+          </div>
+          <div>
+            <label>Category</label>
+            <select id="category" multiple required></select>
+          </div>
+          <div>
+            <label>Project Type</label>
+            <select id="projectType" required></select>
+          </div>
+          <div class="full">
+            <label>Lesson Learned</label>
+            <textarea id="lessonLearned" required placeholder="Example: Always check Matterport survey with drawings."></textarea>
+          </div>
+          <div class="full">
+            <label>Why is it a Lesson?</label>
+            <textarea id="whyLesson" required placeholder="Explain the real mistake, assumption, gap, or commercial impact."></textarea>
+          </div>
+          <div class="full">
+            <label>What is to be Done?</label>
+            <textarea id="toBeDone" required placeholder="List corrective/preventive actions."></textarea>
+          </div>
+          <div>
+            <label>Project Name</label>
+            <input id="projectName" required placeholder="E-4375 - JW Marriott Marquis - Dubai" />
+          </div>
+          <div>
+            <label>Source</label>
+            <select id="source" required></select>
+          </div>
+          <div>
+            <label>Tags</label>
+            <select id="tags" multiple></select>
+          </div>
+          <div>
+            <label>Trade</label>
+            <select id="trade" multiple></select>
+          </div>
+          <div>
+            <label>Root Cause</label>
+            <select id="rootCause"></select>
+          </div>
+          <div>
+            <label>Project Phase</label>
+            <select id="phase"></select>
+          </div>
+          <div>
+            <label>Status</label>
+            <select id="status"></select>
+          </div>
+          <div>
+            <label>Responsible Person / Team</label>
+            <select id="responsible"></select>
+          </div>
+          <div class="full">
+            <label>Commercial / Cost Impact Note</label>
+            <textarea id="costImpact" placeholder="State potential omission, variation exposure, rework risk, time impact, or pricing buffer required."></textarea>
+          </div>
+          <div class="full">
+            <label>Preventive Checklist Item</label>
+            <textarea id="checklistItem" placeholder="Add a reusable checklist rule for future tenders."></textarea>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+          <button type="button" class="secondary" onclick="closeEntryModal()">Cancel</button>
+          <button type="submit" class="blue">✓ Save Lesson</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>⚙️ Dropdown Elements Setup</h2>
+        <button class="secondary" onclick="closeSettings()">✕ Close</button>
+      </div>
+      <p style="color:var(--muted); margin-top:0; margin-bottom:16px;">Define the dropdown options below. These values control the entry form, filters, and slicers.</p>
+      <div class="dropdown-admin" id="dropdownAdmin"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'fitout_lessons_learned_register_v2';
+    const OPTIONS_KEY = 'fitout_lessons_dropdown_options_v2';
+
+    const defaultOptions = {
+      category: ['Mistake', 'Laziness', 'Assumption', 'Missing Scope', 'Wrong Quantity', 'Supplier Issue', 'Drawing Gap', 'Specification Gap', 'Commercial Risk', 'Coordination Failure'],
+      impactLevel: ['Low', 'Medium', 'High', 'Critical'],
+      projectType: ['Tender', 'Live Project', 'Variation', 'Mock-Up', 'Design & Build', 'Post Tender Clarification', 'Handover'],
+      source: ['Self Review', 'Team Member', 'Client Comment', 'Consultant Comment', 'Site Visit', 'Matterport', 'BOQ Review', 'Drawing Review', 'Supplier Quote', 'Subcontractor Feedback'],
+      tags: ['Matterport', 'BOQ Quantity', 'Drawing Check', 'Site Condition', 'RFI', 'PTC', 'VE', 'Nominated Supplier', 'Lead Time', 'Existing Condition', 'Builders Work'],
+      trade: ['Common', 'Civil Works', 'Joinery', 'Ceiling', 'Flooring', 'Wall Finish', 'MEP', 'ELV', 'Lighting', 'Glass & Metal', 'Loose Furniture', 'Signage', 'Waterproofing'],
+      rootCause: ['No Site Verification', 'Over-Reliance on BOQ', 'Drawing Not Cross-Checked', 'Specification Missed', 'Rushed Pricing', 'Poor Communication', 'Supplier Claim Accepted', 'Scope Boundary Unclear', 'Existing Condition Unknown'],
+      phase: ['Tender Stage', 'PTC / BAFO', 'Procurement', 'Mock-Up', 'Execution', 'Handover', 'Post-Completion'],
+      status: ['Open', 'In Progress', 'Closed', 'Converted to Checklist', 'Requires Management Action'],
+      responsible: ['Estimator', 'Senior Estimator', 'QS', 'Project Manager', 'MEP Team', 'Joinery Team', 'Procurement', 'Design Coordinator', 'Commercial Manager']
+    };
+
+    let options = loadOptions();
+    let lessons = loadLessons();
+    let statusChartInstance = null;
+
+    if (!localStorage.getItem('fitout_lessons_demo_cleanup_done_v2')) {
+      lessons = [];
+      persistLessons();
+      localStorage.setItem('fitout_lessons_demo_cleanup_done_v2', 'yes');
+    }
+
+    function loadOptions() {
+      return JSON.parse(localStorage.getItem(OPTIONS_KEY) || JSON.stringify(defaultOptions));
+    }
+
+    function saveOptions() {
+      localStorage.setItem(OPTIONS_KEY, JSON.stringify(options));
+      populateAllSelects();
+      renderDropdownAdmin();
+      render();
+    }
+
+    function loadLessons() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }
+
+    function persistLessons() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons));
+    }
+
+    function optionColor(type, value) {
+      const v = String(value || '').toLowerCase();
+      if (['critical', 'mistake', 'high', 'open', 'missing scope'].some(x => v.includes(x))) return 'red';
+      if (['medium', 'in progress', 'assumption', 'rushed'].some(x => v.includes(x))) return 'amber';
+      if (['low', 'closed', 'converted'].some(x => v.includes(x))) return 'green';
+      if (['tender', 'matterport', 'drawing'].some(x => v.includes(x))) return 'blue';
+      return 'purple';
+    }
+
+    function fillSelect(id, values, includeAll = false, multiple = false) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = '';
+      if (includeAll) {
+        const all = document.createElement('option');
+        all.value = 'all';
+        all.textContent = 'All';
+        el.appendChild(all);
+      }
+      values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        el.appendChild(opt);
+      });
+    }
+
+    function populateAllSelects() {
+      fillSelect('categoryFilter', options.category, true);
+      fillSelect('impactFilter', options.impactLevel, true);
+      fillSelect('projectTypeFilter', options.projectType, true);
+      fillSelect('sourceFilter', options.source, true);
+      fillSelect('tradeFilter', options.trade, true);
+      fillSelect('tagFilter', options.tags, true);
+      fillSelect('statusFilter', options.status, true);
+      fillSelect('responsibleFilter', options.responsible, true);
+      fillSelect('phaseFilter', options.phase, true);
+      fillSelect('rootCauseFilter', options.rootCause, true);
+
+      fillSelect('category', options.category);
+      fillSelect('impactLevel', options.impactLevel);
+      fillSelect('projectType', options.projectType);
+      fillSelect('source', options.source);
+      fillSelect('tags', options.tags);
+      fillSelect('trade', options.trade);
+      fillSelect('rootCause', options.rootCause);
+      fillSelect('phase', options.phase);
+      fillSelect('status', options.status);
+      fillSelect('responsible', options.responsible);
+    }
+
+    function selectedValues(id) {
+      const el = document.getElementById(id);
+      return Array.from(el.selectedOptions || []).map(o => o.value);
+    }
+
+    function setMulti(id, values) {
+      const el = document.getElementById(id);
+      Array.from(el.options).forEach(o => o.selected = (values || []).includes(o.value));
+    }
+
+    function pill(value, type = '') {
+      return `<span class="pill ${optionColor(type, value)}">${escapeHtml(value)}</span>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    function getFilteredLessons() {
+      const search = document.getElementById('searchFilter').value.toLowerCase().trim();
+      const category = document.getElementById('categoryFilter').value;
+      const impact = document.getElementById('impactFilter').value;
+      const projectType = document.getElementById('projectTypeFilter').value;
+      const source = document.getElementById('sourceFilter').value;
+      const trade = document.getElementById('tradeFilter').value;
+      const tag = document.getElementById('tagFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const responsible = document.getElementById('responsibleFilter').value;
+      const phase = document.getElementById('phaseFilter').value;
+      const rootCause = document.getElementById('rootCauseFilter').value;
+      const dateFrom = document.getElementById('dateFrom').value;
+      const dateTo = document.getElementById('dateTo').value;
+      const quick = document.getElementById('quickFilter').value;
+
+      let result = lessons.filter(l => {
+        const allText = JSON.stringify(l).toLowerCase();
+        if (search && !allText.includes(search)) return false;
+        if (category !== 'all' && !(l.category || []).includes(category)) return false;
+        if (impact !== 'all' && l.impactLevel !== impact) return false;
+        if (projectType !== 'all' && l.projectType !== projectType) return false;
+        if (source !== 'all' && l.source !== source) return false;
+        if (trade !== 'all' && !(l.trade || []).includes(trade)) return false;
+        if (tag !== 'all' && !(l.tags || []).includes(tag)) return false;
+        if (status !== 'all' && l.status !== status) return false;
+        if (responsible !== 'all' && l.responsible !== responsible) return false;
+        if (phase !== 'all' && l.phase !== phase) return false;
+        if (rootCause !== 'all' && l.rootCause !== rootCause) return false;
+        if (dateFrom && l.date < dateFrom) return false;
+        if (dateTo && l.date > dateTo) return false;
+        if (quick === 'high-risk' && !['High', 'Critical'].includes(l.impactLevel)) return false;
+        if (quick === 'open-action' && !['Open', 'In Progress', 'Requires Management Action'].includes(l.status)) return false;
+        if (quick === 'matterport' && !(l.tags || []).includes('Matterport') && l.source !== 'Matterport') return false;
+        if (quick === 'tender' && l.projectType !== 'Tender') return false;
+        return true;
+      });
+
+      const sortBy = document.getElementById('sortBy').value;
+      const rank = { Critical: 4, High: 3, Medium: 2, Low: 1 };
+      result.sort((a,b) => {
+        if (sortBy === 'date-asc') return (a.date || '').localeCompare(b.date || '');
+        if (sortBy === 'impact-desc') return (rank[b.impactLevel] || 0) - (rank[a.impactLevel] || 0);
+        if (sortBy === 'project') return (a.projectName || '').localeCompare(b.projectName || '');
+        return (b.date || '').localeCompare(a.date || '');
+      });
+      return result;
+    }
+
+    function render() {
+      const data = getFilteredLessons();
+      renderMetrics(data);
+      renderBars(data);
+      renderHeatmap(data);
+      renderStatusChart(data);
+      renderTradeMenu(data);
+      renderTable(data);
+    }
+
+    function showScreen(screen) {
+      const isTrade = screen === 'trade';
+      document.getElementById('dashboardVisuals').style.display = isTrade ? 'none' : 'grid';
+      document.getElementById('registerTableSection').style.display = isTrade ? 'none' : 'block';
+      document.getElementById('tradeScreen').style.display = isTrade ? 'block' : 'none';
+      render();
+    }
+
+    function countBy(data, key, array = false) {
+      const map = {};
+      data.forEach(l => {
+        const values = array ? (l[key] || []) : [l[key] || 'Blank'];
+        values.forEach(v => map[v] = (map[v] || 0) + 1);
+      });
+      return map;
+    }
+
+    function topKey(map) {
+      const entries = Object.entries(map).sort((a,b) => b[1] - a[1]);
+      return entries.length ? entries[0][0] : '-';
+    }
+
+    function animateValue(element, finalValue) {
+      if (isNaN(finalValue)) {
+        element.textContent = finalValue;
+        return;
+      }
+      let current = 0;
+      const increment = Math.ceil(finalValue / 20);
+      const interval = setInterval(() => {
+        if (current < finalValue) {
+          current += increment;
+          element.textContent = Math.min(current, finalValue);
+        } else {
+          clearInterval(interval);
+        }
+      }, 30);
+    }
+
+    function renderMetrics(data) {
+      animateValue(document.getElementById('mTotal'), data.length);
+      animateValue(document.getElementById('mHigh'), data.filter(l => ['High','Critical'].includes(l.impactLevel)).length);
+      const openCount = data.filter(l => ['Open','In Progress','Requires Management Action'].includes(l.status)).length;
+      animateValue(document.getElementById('mOpen'), openCount);
+      
+      if (data.length > 0) {
+        const openActionProgress = (openCount / data.length) * 100;
+        document.getElementById('openActionProgress').style.width = Math.min(openActionProgress, 100) + '%';
+      }
+
+      animateValue(document.getElementById('mTradeLessons'), Object.keys(countBy(data, 'trade', true)).length);
+      document.getElementById('mTopCause').textContent = topKey(countBy(data, 'rootCause'));
+    }
+
+    function renderBars(data) {
+      const map = countBy(data, 'category', true);
+      const max = Math.max(1, ...Object.values(map));
+      const html = Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `
+        <div class="bar-row">
+          <div class="bar-label" title="${escapeHtml(k)}">${escapeHtml(k)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%"></div></div>
+          <div class="bar-count">${v}</div>
+        </div>`).join('');
+      document.getElementById('categoryBars').innerHTML = html || '<div class="empty">No data available.</div>';
+    }
+
+    function renderHeatmap(data) {
+      const impacts = options.impactLevel;
+      const map = countBy(data, 'impactLevel');
+      const max = Math.max(1, ...Object.values(map));
+      document.getElementById('impactHeatmap').innerHTML = impacts.map(i => {
+        const c = map[i] || 0;
+        const opacity = 0.08 + (c / max) * 0.35;
+        return `<div class="heat-cell"><span>${escapeHtml(i)}</span><strong>${c}</strong></div>`;
+      }).join('');
+    }
+
+    function renderStatusChart(data) {
+      const map = countBy(data, 'status');
+      const ctx = document.getElementById('statusChart')?.getContext('2d');
+      if (!ctx) return;
+
+      if (statusChartInstance) {
+        statusChartInstance.destroy();
+      }
+
+      const colors = {
+        'Open': '#dc2626',
+        'In Progress': '#d97706',
+        'Closed': '#059669',
+        'Converted to Checklist': '#2563eb',
+        'Requires Management Action': '#7c3aed'
+      };
+
+      statusChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(map),
+          datasets: [{
+            data: Object.values(map),
+            backgroundColor: Object.keys(map).map(k => colors[k] || '#667eea'),
+            borderColor: 'rgba(255,255,255,0.95)',
+            borderWidth: 3,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                font: { size: 11, weight: '700' },
+                padding: 12,
+                usePointStyle: true,
+              }
+            }
+          }
+        }
+      });
+    }
+
+    let selectedTradeForMenu = '';
+
+    function renderTradeMenu(data) {
+      const tradeMap = {};
+      data.forEach(l => (l.trade || []).forEach(t => {
+        if (!tradeMap[t]) tradeMap[t] = [];
+        tradeMap[t].push(l);
+      }));
+
+      const trades = Object.keys(tradeMap).sort((a,b) => tradeMap[b].length - tradeMap[a].length || a.localeCompare(b));
+      if (!trades.length) {
+        document.getElementById('tradeLessonList').innerHTML = '<div class="empty">No trade lessons.</div>';
+        document.getElementById('tradeLessonDetail').innerHTML = '<div class="empty">Select a trade after adding lessons.</div>';
+        return;
+      }
+
+      if (!selectedTradeForMenu || !tradeMap[selectedTradeForMenu]) selectedTradeForMenu = trades[0];
+
+      document.getElementById('tradeLessonList').innerHTML = trades.map(t => `
+        <button class="trade-item ${t === selectedTradeForMenu ? 'active' : ''}" onclick="selectTradeMenu('${escapeHtml(t).replace(/'/g, "\'")}')">
+          <span>${escapeHtml(t)}</span><span>${tradeMap[t].length}</span>
+        </button>
+      `).join('');
+
+      const selectedLessons = tradeMap[selectedTradeForMenu] || [];
+      document.getElementById('tradeLessonDetail').innerHTML = `
+        <h3>${escapeHtml(selectedTradeForMenu)} — Cumulative Lessons</h3>
+        <p style="margin:0 0 10px; color:var(--muted); font-size:12px; line-height:1.35;">Use this before pricing, sending supplier inquiries, reviewing quotes, or preparing RFIs for this trade.</p>
+        ${selectedLessons.map(l => `
+          <div class="trade-summary-item">
+            <strong>${escapeHtml(l.lessonLearned)}</strong>
+            <p><b>🎯 Action:</b> ${escapeHtml(l.toBeDone)}</p>
+            <p><b>🔍 Root Cause:</b> ${escapeHtml(l.rootCause || '-')} | <b>📍 Project:</b> ${escapeHtml(l.projectName || '-')}</p>
+            <div>${pill(l.impactLevel, 'impact')} ${pill(l.status, 'status')}</div>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function selectTradeMenu(trade) {
+      selectedTradeForMenu = trade;
+      render();
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('lessonTable');
+      const empty = document.getElementById('emptyState');
+      tbody.innerHTML = data.map((l, idx) => `
+        <tr style="animation-delay: ${idx * 30}ms">
+          <td>${escapeHtml(l.date)}</td>
+          <td>${(l.category || []).map(x => pill(x,'category')).join('')}</td>
+          <td>${pill(l.impactLevel,'impact')}</td>
+          <td><strong>${escapeHtml(l.lessonLearned)}</strong></td>
+          <td>${escapeHtml(l.whyLesson)}</td>
+          <td>${escapeHtml(l.toBeDone)}</td>
+          <td>${escapeHtml(l.projectName)}</td>
+          <td>${pill(l.projectType,'projectType')}</td>
+          <td>${pill(l.source,'source')}</td>
+          <td>${(l.tags || []).map(x => pill(x,'tag')).join('')}</td>
+          <td>${(l.trade || []).map(x => pill(x,'trade')).join('')}</td>
+          <td>${escapeHtml(l.rootCause)}</td>
+          <td>${pill(l.status,'status')}</td>
+          <td>${escapeHtml(l.responsible)}</td>
+          <td><div class="actions"><button class="icon-btn secondary" onclick="editLesson('${l.id}')">✏️ Edit</button><button class="icon-btn danger" onclick="deleteLesson('${l.id}')">🗑️ Delete</button></div></td>
+        </tr>
+      `).join('');
+      empty.style.display = data.length ? 'none' : 'block';
+    }
+
+    function openEntryModal(id = null) {
+      document.getElementById('lessonForm').reset();
+      document.getElementById('lessonId').value = '';
+      document.getElementById('date').value = new Date().toISOString().slice(0,10);
+      document.getElementById('entryTitle').textContent = '📝 New Lesson';
+      if (id) editLesson(id);
+      document.getElementById('entryModal').style.display = 'flex';
+    }
+
+    function closeEntryModal() { document.getElementById('entryModal').style.display = 'none'; }
+
+    function saveLesson(e) {
+      e.preventDefault();
+      const id = document.getElementById('lessonId').value || crypto.randomUUID();
+      const entry = {
+        id,
+        date: document.getElementById('date').value,
+        category: selectedValues('category'),
+        impactLevel: document.getElementById('impactLevel').value,
+        lessonLearned: document.getElementById('lessonLearned').value.trim(),
+        whyLesson: document.getElementById('whyLesson').value.trim(),
+        toBeDone: document.getElementById('toBeDone').value.trim(),
+        projectName: document.getElementById('projectName').value.trim(),
+        projectType: document.getElementById('projectType').value,
+        source: document.getElementById('source').value,
+        tags: selectedValues('tags'),
+        trade: selectedValues('trade'),
+        rootCause: document.getElementById('rootCause').value,
+        phase: document.getElementById('phase').value,
+        status: document.getElementById('status').value,
+        responsible: document.getElementById('responsible').value,
+        costImpact: document.getElementById('costImpact').value.trim(),
+        checklistItem: document.getElementById('checklistItem').value.trim()
+      };
+      const idx = lessons.findIndex(l => l.id === id);
+      if (idx >= 0) lessons[idx] = entry; else lessons.unshift(entry);
+      persistLessons();
+      closeEntryModal();
+      render();
+    }
+
+    function editLesson(id) {
+      const l = lessons.find(x => x.id === id);
+      if (!l) return;
+      document.getElementById('entryTitle').textContent = '✏️ Edit Lesson';
+      document.getElementById('lessonId').value = l.id;
+      ['date','impactLevel','lessonLearned','whyLesson','toBeDone','projectName','projectType','source','rootCause','phase','status','responsible','costImpact','checklistItem'].forEach(k => {
+        const el = document.getElementById(k);
+        if (el) el.value = l[k] || '';
+      });
+      setMulti('category', l.category || []);
+      setMulti('tags', l.tags || []);
+      setMulti('trade', l.trade || []);
+      document.getElementById('entryModal').style.display = 'flex';
+    }
+
+    function deleteLesson(id) {
+      if (!confirm('🗑️ Delete this lesson learned record?')) return;
+      lessons = lessons.filter(l => l.id !== id);
+      persistLessons();
+      render();
+    }
+
+    function resetFilters() {
+      ['searchFilter','dateFrom','dateTo'].forEach(id => document.getElementById(id).value = '');
+      ['categoryFilter','impactFilter','projectTypeFilter','sourceFilter','tradeFilter','tagFilter','statusFilter','responsibleFilter','phaseFilter','rootCauseFilter'].forEach(id => document.getElementById(id).value = 'all');
+      document.getElementById('quickFilter').value = 'all';
+      document.getElementById('sortBy').value = 'date-desc';
+      render();
+    }
+
+    function openSettings() {
+      renderDropdownAdmin();
+      document.getElementById('settingsModal').style.display = 'flex';
+    }
+
+    function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+
+    function renderDropdownAdmin() {
+      const labels = {
+        category: 'Category', impactLevel: 'Impact Level', projectType: 'Project Type', source: 'Source', tags: 'Tags', trade: 'Trade', rootCause: 'Root Cause', phase: 'Project Phase', status: 'Status', responsible: 'Responsible Person / Team'
+      };
+      document.getElementById('dropdownAdmin').innerHTML = Object.keys(defaultOptions).map(key => `
+        <div class="card" style="box-shadow:none; border-radius:14px; border: 1px solid var(--line);">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+            <strong>${labels[key]}</strong>
+            <div style="display:flex; gap:8px; width:min(460px, 100%);">
+              <input id="add_${key}" placeholder="Add new ${labels[key]} option" style="font-size:12px;" />
+              <button class="blue" onclick="addOption('${key}')" style="width:100px;">Add</button>
+            </div>
+          </div>
+          <div class="chips">${(options[key] || []).map(v => `<span class="chip">${escapeHtml(v)} <button onclick="removeOption('${key}', '${escapeHtml(v).replace(/'/g, "\'")}')">×</button></span>`).join('')}</div>
+        </div>
+      `).join('');
+    }
+
+    function addOption(key) {
+      const input = document.getElementById('add_' + key);
+      const value = input.value.trim();
+      if (!value) return;
+      if (!options[key].includes(value)) options[key].push(value);
+      input.value = '';
+      saveOptions();
+    }
+
+    function removeOption(key, value) {
+      options[key] = options[key].filter(v => v !== value);
+      saveOptions();
+    }
+
+    function exportCSV() {
+      const headers = ['Date','Category','Impact Level','Lesson Learned','Why is it a Lesson','What is to be Done','Project Name','Project Type','Source','Tags','Trade','Root Cause','Phase','Status','Responsible','Cost Impact','Checklist Item'];
+      const rows = getFilteredLessons().map(l => [
+        l.date, (l.category||[]).join('; '), l.impactLevel, l.lessonLearned, l.whyLesson, l.toBeDone, l.projectName, l.projectType, l.source, (l.tags||[]).join('; '), (l.trade||[]).join('; '), l.rootCause, l.phase, l.status, l.responsible, l.costImpact, l.checklistItem
+      ]);
+      const csv = [headers, ...rows].map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lessons-learned-register.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function loadDemoData() {
+      lessons = [
+        {
+          id: crypto.randomUUID(),
+          date: '2026-02-09',
+          category: ['Mistake', 'Laziness'],
+          impactLevel: 'Low',
+          lessonLearned: 'Always check Matterport survey with drawings.',
+          whyLesson: 'I did not check the Matterport survey for the washroom; scope mentioned replacing the WC ledge wall, but site quantity is different.',
+          toBeDone: '- Check Matterport clearly\n- Do not rely only on BOQ quantity\n- BOQ quantity must always be verified against drawings and site survey',
+          projectName: 'E-4375 - JW Marriott Marquis - Dubai',
+          projectType: 'Tender',
+          source: 'Team Member',
+          tags: ['Matterport', 'BOQ Quantity', 'Site Condition'],
+          trade: ['Civil Works', 'Common'],
+          rootCause: 'No Site Verification',
+          phase: 'Tender Stage',
+          status: 'Converted to Checklist',
+          responsible: 'Estimator',
+          costImpact: 'Potential omission or quantity difference in demolition/replacement of WC ledge wall. Future pricing must verify site quantity before submission.',
+          checklistItem: 'For all refurbishment tenders, cross-check BOQ quantities with Matterport/site survey before final pricing.'
+        },
+        {
+          id: crypto.randomUUID(),
+          date: '2026-02-12',
+          category: ['Assumption', 'Missing Scope'],
+          impactLevel: 'High',
+          lessonLearned: 'Clarify builder\'s work for client direct installation items before pricing final submission.',
+          whyLesson: 'Direct installation items may still require plywood backing, supports, access, containment, coring, making good, or coordination by main contractor.',
+          toBeDone: '- Raise RFI for builder\'s work boundaries\n- Add qualification if response is pending\n- Price minimum known supports separately',
+          projectName: 'E-4406 - HSBC Tower L11 Phase 02',
+          projectType: 'PTC / BAFO',
+          source: 'RFI',
+          tags: ['Builders Work', 'RFI', 'Existing Condition'],
+          trade: ['MEP', 'Civil Works', 'Common'],
+          rootCause: 'Scope Boundary Unclear',
+          phase: 'PTC / BAFO',
+          status: 'Open',
+          responsible: 'MEP Team',
+          costImpact: 'Open-ended builder\'s work may affect cost and programme if not clarified.',
+          checklistItem: 'Never assume client-direct items exclude builder\'s work. Confirm interface responsibility.'
+        },
+        {
+          id: crypto.randomUUID(),
+          date: '2026-02-15',
+          category: ['Supplier Issue'],
+          impactLevel: 'Critical',
+          lessonLearned: 'Verify lead times BEFORE tender submission, not after contract award.',
+          whyLesson: 'Quoted 12-week delivery, but supplier quoted 16 weeks post-award. Caused programme delay and variation claim.',
+          toBeDone: '- Always call supplier directly for lead times\n- Request written confirmation in RFQ\n- Add procurement schedule buffer',
+          projectName: 'E-4412 - Marina Tower Refurb - Abu Dhabi',
+          projectType: 'Live Project',
+          source: 'Client Comment',
+          tags: ['Lead Time', 'Nominated Supplier'],
+          trade: ['Joinery'],
+          rootCause: 'Poor Communication',
+          phase: 'Procurement',
+          status: 'Closed',
+          responsible: 'Senior Estimator',
+          costImpact: 'Programme delay risk: 4 weeks. Potential AED 150,000+ variation exposure.',
+          checklistItem: 'Lead time confirmation must be in writing from supplier, not relying on standard terms.'
+        },
+        {
+          id: crypto.randomUUID(),
+          date: '2026-02-18',
+          category: ['Wrong Quantity'],
+          impactLevel: 'Medium',
+          lessonLearned: 'Floor finish quantities differ between drawings (sqm) and BOQ (rolls/boxes).',
+          whyLesson: 'BOQ listed as "50 rolls of flooring" but drawings showed 320 sqm. Rolls were smaller than expected—pricing off 50 vs 80 rolls needed.',
+          toBeDone: '- Convert all BOQ quantities to metric (sqm, m, no.) against drawings\n- Flag unit mismatches in clarifications\n- Create internal conversion checklist',
+          projectName: 'E-4389 - Dusit Thani Resort Phase 1',
+          projectType: 'Tender',
+          source: 'Drawing Review',
+          tags: ['BOQ Quantity', 'Drawing Check'],
+          trade: ['Flooring', 'Common'],
+          rootCause: 'Over-Reliance on BOQ',
+          phase: 'Tender Stage',
+          status: 'In Progress',
+          responsible: 'QS',
+          costImpact: 'Potential AED 45,000 pricing gap. Correction required in next tender cycle.',
+          checklistItem: 'All BOQ items must be cross-referenced against drawings with unit consistency verified.'
+        }
+      ];
+      persistLessons();
+      render();
+      alert('✅ Demo data loaded! Try filtering and exploring the dashboard.');
+    }
+
+    populateAllSelects();
+    render();
+  </script>
+</body>
+</html>
