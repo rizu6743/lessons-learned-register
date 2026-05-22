@@ -32,7 +32,6 @@
     }
 
     * { box-sizing: border-box; }
-
     html, body { min-height: 100%; }
 
     body {
@@ -97,9 +96,7 @@
     }
 
     /* ===== BUTTONS ===== */
-    button, select, input, textarea { 
-      font: inherit; 
-    }
+    button, select, input, textarea { font: inherit; }
 
     button {
       border: 0;
@@ -174,6 +171,17 @@
 
     button.green:hover {
       box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    button.add-small {
+      padding: 7px 10px;
+      font-size: 11px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    button.add-small:hover {
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
     }
 
     /* ===== LAYOUT ===== */
@@ -257,6 +265,126 @@
       background: rgba(102, 126, 234, 0.02);
     }
 
+    /* ===== ATTRACTIVE SELECT/DROPDOWN ===== */
+    .select-wrapper {
+      position: relative;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .select-container {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+    }
+
+    .select-button {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 13px;
+      border: 1.5px solid var(--line);
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafb 100%);
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--ink);
+    }
+
+    .select-button:hover {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #f0f4ff 0%, #faf8ff 100%);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .select-button.active {
+      border-color: var(--primary);
+      background: linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    .select-button-arrow {
+      font-size: 12px;
+      transition: transform 0.2s ease;
+    }
+
+    .select-button.active .select-button-arrow {
+      transform: rotateZ(180deg);
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1.5px solid var(--primary);
+      border-radius: 10px;
+      margin-top: 4px;
+      z-index: 100;
+      max-height: 280px;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+      display: none;
+    }
+
+    .select-dropdown.active {
+      display: block;
+      animation: slideDown 0.2s ease;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .select-option {
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .select-option:hover {
+      background: linear-gradient(135deg, #dbeafe 0%, #e9d5ff 100%);
+      border-left-color: var(--primary);
+      padding-left: 16px;
+    }
+
+    .select-option.selected {
+      background: linear-gradient(135deg, #c7d2fe 0%, #ddd6fe 100%);
+      border-left-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .add-option-btn {
+      padding: 8px 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: 0;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 6px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .add-option-btn:hover {
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    /* ===== FORM GRID ===== */
     .form-grid { 
       display: grid; 
       grid-template-columns: 1fr 1fr; 
@@ -339,14 +467,6 @@
       font-weight: 800;
     }
 
-    .metric-icon {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      font-size: 24px;
-      opacity: 0.15;
-    }
-
     /* ===== VISUAL GRID ===== */
     .visual-grid { 
       display: grid; 
@@ -359,13 +479,6 @@
       position: relative;
     }
 
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
     /* ===== BARS ===== */
     .bar-row { 
       display: grid; 
@@ -376,9 +489,7 @@
       transition: all 0.25s ease;
     }
 
-    .bar-row:hover {
-      transform: translateX(4px);
-    }
+    .bar-row:hover { transform: translateX(4px); }
 
     .bar-label { 
       font-size: 12px; 
@@ -405,9 +516,7 @@
       transition: width 0.4s ease, filter 0.3s ease;
     }
 
-    .bar-row:hover .bar-fill {
-      filter: brightness(1.15);
-    }
+    .bar-row:hover .bar-fill { filter: brightness(1.15); }
 
     .bar-count { 
       font-size: 12px; 
@@ -454,11 +563,6 @@
       background-clip: text;
     }
 
-    /* ===== CHARTS ===== */
-    #categoryChart, #impactChart {
-      max-height: 200px;
-    }
-
     /* ===== TRADE MENU ===== */
     .trade-menu {
       display: grid;
@@ -482,20 +586,6 @@
 
     .trade-list-large { 
       max-height: 65vh; 
-    }
-
-    .trade-list::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .trade-list::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 10px;
-    }
-
-    .trade-list::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #667eea, #764ba2);
-      border-radius: 10px;
     }
 
     .trade-item {
@@ -547,20 +637,6 @@
 
     .trade-detail-large { 
       max-height: 65vh; 
-    }
-
-    .trade-detail::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .trade-detail::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 10px;
-    }
-
-    .trade-detail::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #667eea, #764ba2);
-      border-radius: 10px;
     }
 
     .trade-detail h3 { 
@@ -661,27 +737,10 @@
       box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.08);
     }
 
-    td:nth-child(4), td:nth-child(5), td:nth-child(6) { 
-      max-width: 220px; 
-    }
-
     .table-scroll {
       max-height: 55vh;
       overflow-y: auto;
       border-top: 1px solid var(--line);
-    }
-
-    .table-scroll::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .table-scroll::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-
-    .table-scroll::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #667eea, #764ba2);
-      border-radius: 10px;
     }
 
     /* ===== PILLS/BADGES ===== */
@@ -708,30 +767,11 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     }
 
-    .pill.red { 
-      background: var(--red-soft); 
-      color: var(--red); 
-    }
-
-    .pill.amber { 
-      background: var(--amber-soft); 
-      color: var(--amber); 
-    }
-
-    .pill.green { 
-      background: var(--green-soft); 
-      color: var(--green); 
-    }
-
-    .pill.blue { 
-      background: var(--blue-soft); 
-      color: var(--blue); 
-    }
-
-    .pill.purple { 
-      background: var(--purple-soft); 
-      color: var(--purple); 
-    }
+    .pill.red { background: var(--red-soft); color: var(--red); }
+    .pill.amber { background: var(--amber-soft); color: var(--amber); }
+    .pill.green { background: var(--green-soft); color: var(--green); }
+    .pill.blue { background: var(--blue-soft); color: var(--blue); }
+    .pill.purple { background: var(--purple-soft); color: var(--purple); }
 
     /* ===== ACTIONS ===== */
     .actions { 
@@ -792,31 +832,42 @@
       filter: brightness(1.2);
     }
 
-    /* ===== INLINE ADD DROPDOWN ===== */
+    /* ===== INLINE ADD FIELD ===== */
+    .inline-add-section {
+      background: linear-gradient(135deg, rgba(102,126,234,0.05) 0%, rgba(118,75,162,0.05) 100%);
+      border: 1.5px dashed rgba(102,126,234,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
     .inline-add-field {
       display: flex;
       gap: 8px;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 0;
     }
 
     .inline-add-field input {
       flex: 1;
       padding: 8px 10px;
       font-size: 12px;
+      border: 1.5px solid var(--line);
+      background: white;
+      border-radius: 8px;
+      transition: all 0.2s ease;
     }
 
-    .inline-add-field button {
-      padding: 8px 12px;
-      font-size: 12px;
-      white-space: nowrap;
+    .inline-add-field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .inline-chips {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 10px;
+      margin-top: 8px;
     }
 
     .inline-chip {
@@ -837,6 +888,12 @@
       color: var(--red);
       font-size: 14px;
       font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .inline-chip button:hover {
+      transform: scale(1.3);
     }
 
     /* ===== MODAL ===== */
@@ -904,33 +961,6 @@
       background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
       border-radius: 14px;
       margin: 24px 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .empty::before {
-      content: "📊";
-      display: block;
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.4;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    /* ===== PROGRESS BAR ===== */
-    .progress-bar {
-      height: 6px;
-      background: #e5e7eb;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      border-radius: 999px;
-      transition: width 0.4s ease;
     }
 
     /* ===== MEDIA QUERIES ===== */
@@ -953,7 +983,6 @@
       .panel, .card, .table-card { background: rgba(15, 23, 42, 0.8); border-color: rgba(102, 126, 234, 0.2); }
       input, select, textarea { background: rgba(30, 27, 75, 0.8); color: #e2e8f0; border-color: rgba(102, 126, 234, 0.3); }
       tbody tr:hover { background: rgba(102, 126, 234, 0.1); }
-      .trade-list { background: rgba(30, 27, 75, 0.6); }
       .modal { background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.9) 100%); }
     }
   </style>
@@ -969,7 +998,7 @@
       <button class="secondary" onclick="showScreen('trade')">🏗️ Trade Lessons</button>
       <button class="secondary" onclick="openSettings()">⚙️ Settings</button>
       <button class="secondary" onclick="exportCSV()">📥 Export CSV</button>
-      <button class="blue" onclick="openEntryModal()">+ New Lesson</button>
+      <button class="blue" onclick="openEntryModal()">➕ New Lesson</button>
     </div>
   </header>
 
@@ -1014,10 +1043,10 @@
       <label>Quick View</label>
       <select id="quickFilter" onchange="render()">
         <option value="all">All Records</option>
-        <option value="high-risk">⚠️ High / Critical Impact</option>
-        <option value="open-action">📍 Open Corrective Action</option>
-        <option value="matterport">🎥 Matterport Related</option>
-        <option value="tender">🎯 Tender Related</option>
+        <option value="high-risk">High / Critical Impact</option>
+        <option value="open-action">Open Corrective Action</option>
+        <option value="matterport">Matterport Related</option>
+        <option value="tender">Tender Related</option>
       </select>
 
       <div style="display:flex; gap:8px; margin-top:16px;">
@@ -1027,53 +1056,28 @@
 
     <main class="main">
       <section class="metrics">
-        <div class="metric">
-          <div class="metric-icon">📚</div>
-          <small>Total Lessons</small>
-          <strong id="mTotal">0</strong>
-        </div>
-        <div class="metric">
-          <div class="metric-icon">⚠️</div>
-          <small>High Risk</small>
-          <strong id="mHigh">0</strong>
-        </div>
-        <div class="metric">
-          <div class="metric-icon">📍</div>
-          <small>Open Actions</small>
-          <strong id="mOpen">0</strong>
-          <div class="progress-bar"><div class="progress-fill" id="openActionProgress"></div></div>
-        </div>
-        <div class="metric">
-          <div class="metric-icon">🏗️</div>
-          <small>Trade Lessons</small>
-          <strong id="mTradeLessons">0</strong>
-        </div>
-        <div class="metric">
-          <div class="metric-icon">🎯</div>
-          <small>Top Root Cause</small>
-          <strong id="mTopCause" style="font-size:16px;">-</strong>
-        </div>
+        <div class="metric card"><small>Total Lessons</small><strong id="mTotal">0</strong></div>
+        <div class="metric card"><small>High Risk</small><strong id="mHigh">0</strong></div>
+        <div class="metric card"><small>Open Actions</small><strong id="mOpen">0</strong></div>
+        <div class="metric card"><small>Trade Lessons</small><strong id="mTradeLessons">0</strong></div>
+        <div class="metric card"><small>Most Repeated Cause</small><strong id="mTopCause" style="font-size:16px;">-</strong></div>
       </section>
 
       <section class="visual-grid" id="dashboardVisuals">
         <div class="card">
-          <div class="section-title">📊 Lessons by Category</div>
+          <div class="section-title">Lessons by Category</div>
           <div id="categoryBars"></div>
         </div>
         <div class="card">
-          <div class="section-title">🔥 Impact Heatmap</div>
+          <div class="section-title">Impact Heatmap</div>
           <div class="heatmap" id="impactHeatmap"></div>
-        </div>
-        <div class="card">
-          <div class="section-title">📈 Status Overview</div>
-          <canvas id="statusChart"></canvas>
         </div>
       </section>
 
       <section class="card" id="tradeScreen" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px;">
           <div>
-            <div class="section-title" style="font-size:18px; margin-bottom:4px;">🏗️ Trade Lessons — Cumulative Screen</div>
+            <div class="section-title" style="font-size:18px; margin-bottom:4px;">Trade Lessons — Cumulative Screen</div>
             <div style="color:var(--muted); font-size:13px; line-height:1.45; max-width:820px;">Use this screen before pricing, sending supplier/subcontractor inquiries, preparing RFIs, reviewing quotes, or finalizing trade assumptions.</div>
           </div>
           <button class="secondary" onclick="showScreen('register')">← Back</button>
@@ -1096,7 +1100,7 @@
           <select id="responsibleFilter" onchange="render()"></select>
           <select id="phaseFilter" onchange="render()"></select>
           <select id="rootCauseFilter" onchange="render()"></select>
-          <button class="secondary" onclick="print()">🖨️ Print / PDF</button>
+          <button class="secondary" onclick="print()">🖨️ Print</button>
         </div>
         <div class="table-scroll">
           <table>
@@ -1131,111 +1135,87 @@
   <div class="modal-backdrop" id="entryModal">
     <div class="modal">
       <div class="modal-header">
-        <h2 id="entryTitle">📝 New Lesson</h2>
+        <h2 id="entryTitle">✏️ New Lesson</h2>
         <button class="secondary" onclick="closeEntryModal()">✕ Close</button>
       </div>
       <form id="lessonForm" onsubmit="saveLesson(event)">
         <input type="hidden" id="lessonId" />
         <div class="form-grid">
           <div>
-            <label>Date</label>
+            <label>📅 Date</label>
             <input id="date" type="date" required />
           </div>
           <div>
-            <label>Impact Level</label>
-            <select id="impactLevel" required></select>
+            <label>⚡ Impact Level</label>
+            <div id="impactLevelWrapper"></div>
+          </div>
+          <div class="full">
+            <label>📌 Category (Select One or More)</label>
+            <div id="categoryWrapper"></div>
           </div>
           <div>
-            <label>Category</label>
-            <select id="category" multiple required></select>
-          </div>
-          <div class="full">
-            <label>Add New Category (Optional)</label>
-            <div class="inline-add-field">
-              <input id="newCategory" type="text" placeholder="Type new category..." />
-              <button type="button" class="blue" onclick="addNewCategory()" style="width: auto;">+ Add</button>
-            </div>
-            <div id="newCategoryChips" class="inline-chips"></div>
+            <label>🏢 Fitout Type</label>
+            <div id="fitoutTypeWrapper"></div>
           </div>
           <div>
-            <label>Fitout Type</label>
-            <select id="fitoutType" required></select>
+            <label>📋 Project Type</label>
+            <div id="projectTypeWrapper"></div>
           </div>
           <div class="full">
-            <label>Add New Fitout Type (Optional)</label>
-            <div class="inline-add-field">
-              <input id="newFitoutType" type="text" placeholder="Type new fitout type..." />
-              <button type="button" class="blue" onclick="addNewFitoutType()" style="width: auto;">+ Add</button>
-            </div>
-            <div id="newFitoutTypeChips" class="inline-chips"></div>
-          </div>
-          <div>
-            <label>Project Type</label>
-            <select id="projectType" required></select>
-          </div>
-          <div class="full">
-            <label>Add New Project Type (Optional)</label>
-            <div class="inline-add-field">
-              <input id="newProjectType" type="text" placeholder="Type new project type..." />
-              <button type="button" class="blue" onclick="addNewProjectType()" style="width: auto;">+ Add</button>
-            </div>
-            <div id="newProjectTypeChips" class="inline-chips"></div>
-          </div>
-          <div class="full">
-            <label>Lesson Learned</label>
+            <label>💡 Lesson Learned</label>
             <textarea id="lessonLearned" required placeholder="Example: Always check Matterport survey with drawings."></textarea>
           </div>
           <div class="full">
-            <label>Why is it a Lesson?</label>
+            <label>❓ Why is it a Lesson?</label>
             <textarea id="whyLesson" required placeholder="Explain the real mistake, assumption, gap, or commercial impact."></textarea>
           </div>
           <div class="full">
-            <label>What is to be Done?</label>
+            <label>✅ What is to be Done?</label>
             <textarea id="toBeDone" required placeholder="List corrective/preventive actions."></textarea>
           </div>
           <div>
-            <label>Project Name</label>
+            <label>🏆 Project Name</label>
             <input id="projectName" required placeholder="E-4375 - JW Marriott Marquis - Dubai" />
           </div>
           <div>
-            <label>Source</label>
-            <select id="source" required></select>
-          </div>
-          <div>
-            <label>Tags</label>
-            <select id="tags" multiple></select>
-          </div>
-          <div>
-            <label>Trade</label>
-            <select id="trade" multiple></select>
-          </div>
-          <div>
-            <label>Root Cause</label>
-            <select id="rootCause"></select>
-          </div>
-          <div>
-            <label>Project Phase</label>
-            <select id="phase"></select>
-          </div>
-          <div>
-            <label>Status</label>
-            <select id="status"></select>
-          </div>
-          <div>
-            <label>Responsible Person / Team</label>
-            <select id="responsible"></select>
+            <label>📍 Source</label>
+            <div id="sourceWrapper"></div>
           </div>
           <div class="full">
-            <label>Commercial / Cost Impact Note</label>
+            <label>🎫 Tags (Select One or More)</label>
+            <div id="tagsWrapper"></div>
+          </div>
+          <div class="full">
+            <label>🔧 Trade (Select One or More)</label>
+            <div id="tradeWrapper"></div>
+          </div>
+          <div>
+            <label>🔍 Root Cause</label>
+            <div id="rootCauseWrapper"></div>
+          </div>
+          <div>
+            <label>📆 Project Phase</label>
+            <div id="phaseWrapper"></div>
+          </div>
+          <div>
+            <label>🔔 Status</label>
+            <div id="statusWrapper"></div>
+          </div>
+          <div>
+            <label>👤 Responsible Person / Team</label>
+            <div id="responsibleWrapper"></div>
+          </div>
+          <div class="full">
+            <label>💰 Commercial / Cost Impact Note</label>
             <textarea id="costImpact" placeholder="State potential omission, variation exposure, rework risk, time impact, or pricing buffer required."></textarea>
           </div>
           <div class="full">
-            <label>Preventive Checklist Item</label>
+            <label>📋 Preventive Checklist Item</label>
             <textarea id="checklistItem" placeholder="Add a reusable checklist rule for future tenders."></textarea>
           </div>
         </div>
-        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
-          <button type="button" class="secondary" onclick="closeEntryModal()">Cancel</button>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" class="secondary" onclick="closeEntryModal()">❌ Cancel</button>
           <button type="submit" class="blue">✓ Save Lesson</button>
         </div>
       </form>
@@ -1248,14 +1228,14 @@
         <h2>⚙️ Dropdown Elements Setup</h2>
         <button class="secondary" onclick="closeSettings()">✕ Close</button>
       </div>
-      <p style="color:var(--muted); margin-top:0; margin-bottom:16px;">Define the dropdown options below. These values control the entry form, filters, and slicers.</p>
+      <p style="color:var(--muted); margin-top:0;">Define the dropdown options separately here. These values control the entry form, filters, and slicers.</p>
       <div class="dropdown-admin" id="dropdownAdmin"></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'fitout_lessons_learned_register_v3';
-    const OPTIONS_KEY = 'fitout_lessons_dropdown_options_v3';
+    const STORAGE_KEY = 'fitout_lessons_learned_register_v2';
+    const OPTIONS_KEY = 'fitout_lessons_dropdown_options_v2';
 
     const defaultOptions = {
       category: ['Mistake', 'Laziness', 'Assumption', 'Missing Scope', 'Wrong Quantity', 'Supplier Issue', 'Drawing Gap', 'Specification Gap', 'Commercial Risk', 'Coordination Failure'],
@@ -1263,22 +1243,16 @@
       fitoutType: ['Commercial', 'F&B', 'Residential', 'Retail', 'Hospitality', 'Health Care'],
       projectType: ['Traditional Tender', 'Design and Build', 'Tender without BOQ'],
       source: ['Self Review', 'Team Member', 'Client Comment', 'Consultant Comment', 'Site Visit', 'Matterport', 'BOQ Review', 'Drawing Review', 'Supplier Quote', 'Subcontractor Feedback'],
-      tags: ['Matterport', 'BOQ Quantity', 'Drawing Check', 'Site Condition', 'RFI', 'PTC', 'VE', 'Nominated Supplier', 'Lead Time', 'Existing Condition', 'Builders Work'],
+      tags: ['Matterport', 'BOQ Quantity', 'Drawing Check', 'Site Condition', 'RFI', 'VE', 'Nominated Supplier', 'Lead Time', 'Existing Condition', 'Builders Work'],
       trade: ['Common', 'Civil Works', 'Joinery', 'Ceiling', 'Flooring', 'Wall Finish', 'MEP', 'ELV', 'Lighting', 'Glass & Metal', 'Loose Furniture', 'Signage', 'Waterproofing'],
       rootCause: ['No Site Verification', 'Over-Reliance on BOQ', 'Drawing Not Cross-Checked', 'Specification Missed', 'Rushed Pricing', 'Poor Communication', 'Supplier Claim Accepted', 'Scope Boundary Unclear', 'Existing Condition Unknown'],
       phase: ['Tender Stage', 'PTC / BAFO', 'Procurement', 'Mock-Up', 'Execution', 'Handover', 'Post-Completion'],
-      status: ['Open', 'In Progress', 'Closed', 'Converted to Checklist', 'Requires Management Action'],
+      status: ['Open', 'In Progress', 'Closed', 'Requires Management Action'],
       responsible: ['Estimator', 'Senior Estimator', 'QS', 'Project Manager', 'MEP Team', 'Joinery Team', 'Procurement', 'Design Coordinator', 'Commercial Manager']
     };
 
     let options = loadOptions();
     let lessons = loadLessons();
-    let statusChartInstance = null;
-    let tempNewItems = {
-      category: [],
-      fitoutType: [],
-      projectType: []
-    };
 
     function loadOptions() {
       return JSON.parse(localStorage.getItem(OPTIONS_KEY) || JSON.stringify(defaultOptions));
@@ -1303,7 +1277,7 @@
       const v = String(value || '').toLowerCase();
       if (['critical', 'mistake', 'high', 'open', 'missing scope'].some(x => v.includes(x))) return 'red';
       if (['medium', 'in progress', 'assumption', 'rushed'].some(x => v.includes(x))) return 'amber';
-      if (['low', 'closed', 'converted'].some(x => v.includes(x))) return 'green';
+      if (['low', 'closed'].some(x => v.includes(x))) return 'green';
       if (['tender', 'matterport', 'drawing'].some(x => v.includes(x))) return 'blue';
       return 'purple';
     }
@@ -1326,6 +1300,122 @@
       });
     }
 
+    function createCustomSelect(containerId, values, selectedValues = []) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'select-wrapper';
+      
+      const selectContainer = document.createElement('div');
+      selectContainer.className = 'select-container';
+      
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'select-button';
+      button.innerHTML = `<span>${selectedValues.length ? selectedValues.join(', ') : 'Select...'}</span><span class="select-button-arrow">▼</span>`;
+      
+      const dropdown = document.createElement('div');
+      dropdown.className = 'select-dropdown';
+      
+      values.forEach(val => {
+        const option = document.createElement('div');
+        option.className = 'select-option' + (selectedValues.includes(val) ? ' selected' : '');
+        option.textContent = val;
+        option.onclick = (e) => {
+          e.stopPropagation();
+          const idx = selectedValues.indexOf(val);
+          if (idx > -1) {
+            selectedValues.splice(idx, 1);
+          } else {
+            selectedValues.push(val);
+          }
+          createCustomSelect(containerId, values, selectedValues);
+        };
+        dropdown.appendChild(option);
+      });
+      
+      button.onclick = (e) => {
+        e.preventDefault();
+        dropdown.classList.toggle('active');
+        button.classList.toggle('active');
+      };
+      
+      document.addEventListener('click', (e) => {
+        if (!selectContainer.contains(e.target)) {
+          dropdown.classList.remove('active');
+          button.classList.remove('active');
+        }
+      });
+      
+      selectContainer.appendChild(button);
+      selectContainer.appendChild(dropdown);
+      wrapper.appendChild(selectContainer);
+      container.appendChild(wrapper);
+    }
+
+    function createSingleSelect(containerId, values, selectedValue = '') {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'select-wrapper';
+      
+      const selectContainer = document.createElement('div');
+      selectContainer.className = 'select-container';
+      
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'select-button';
+      button.innerHTML = `<span>${selectedValue || 'Select...'}</span><span class="select-button-arrow">▼</span>`;
+      
+      const dropdown = document.createElement('div');
+      dropdown.className = 'select-dropdown';
+      
+      values.forEach(val => {
+        const option = document.createElement('div');
+        option.className = 'select-option' + (val === selectedValue ? ' selected' : '');
+        option.textContent = val;
+        option.onclick = (e) => {
+          e.stopPropagation();
+          button.innerHTML = `<span>${val}</span><span class="select-button-arrow">▼</span>`;
+          dropdown.classList.remove('active');
+          button.classList.remove('active');
+          // Store in hidden input
+          const hiddenInput = container.querySelector('input[type="hidden"]');
+          if (hiddenInput) hiddenInput.value = val;
+        };
+        dropdown.appendChild(option);
+      });
+      
+      button.onclick = (e) => {
+        e.preventDefault();
+        dropdown.classList.toggle('active');
+        button.classList.toggle('active');
+      };
+      
+      document.addEventListener('click', (e) => {
+        if (!selectContainer.contains(e.target)) {
+          dropdown.classList.remove('active');
+          button.classList.remove('active');
+        }
+      });
+      
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.value = selectedValue;
+      
+      selectContainer.appendChild(button);
+      selectContainer.appendChild(dropdown);
+      wrapper.appendChild(selectContainer);
+      wrapper.appendChild(hiddenInput);
+      container.appendChild(wrapper);
+    }
+
     function populateAllSelects() {
       fillSelect('categoryFilter', options.category, true);
       fillSelect('impactFilter', options.impactLevel, true);
@@ -1338,28 +1428,27 @@
       fillSelect('responsibleFilter', options.responsible, true);
       fillSelect('phaseFilter', options.phase, true);
       fillSelect('rootCauseFilter', options.rootCause, true);
-
-      fillSelect('category', options.category);
-      fillSelect('impactLevel', options.impactLevel);
-      fillSelect('fitoutType', options.fitoutType);
-      fillSelect('projectType', options.projectType);
-      fillSelect('source', options.source);
-      fillSelect('tags', options.tags);
-      fillSelect('trade', options.trade);
-      fillSelect('rootCause', options.rootCause);
-      fillSelect('phase', options.phase);
-      fillSelect('status', options.status);
-      fillSelect('responsible', options.responsible);
     }
 
     function selectedValues(id) {
-      const el = document.getElementById(id);
-      return Array.from(el.selectedOptions || []).map(o => o.value);
+      const container = document.getElementById(id);
+      if (!container) return [];
+      const selects = container.querySelectorAll('.select-container');
+      if (selects.length > 0) {
+        return Array.from(selects).map(s => s.querySelector('input[type="hidden"]')?.value || '').filter(v => v);
+      }
+      return [];
+    }
+
+    function getSelectedValue(id) {
+      const container = document.getElementById(id);
+      if (!container) return '';
+      const hiddenInput = container.querySelector('input[type="hidden"]');
+      return hiddenInput?.value || '';
     }
 
     function setMulti(id, values) {
-      const el = document.getElementById(id);
-      Array.from(el.options).forEach(o => o.selected = (values || []).includes(o.value));
+      createCustomSelect(id, options[id] || [], values);
     }
 
     function pill(value, type = '') {
@@ -1406,7 +1495,7 @@
         if (quick === 'high-risk' && !['High', 'Critical'].includes(l.impactLevel)) return false;
         if (quick === 'open-action' && !['Open', 'In Progress', 'Requires Management Action'].includes(l.status)) return false;
         if (quick === 'matterport' && !(l.tags || []).includes('Matterport') && l.source !== 'Matterport') return false;
-        if (quick === 'tender' && !['Traditional Tender', 'Design and Build', 'Tender without BOQ'].includes(l.projectType)) return false;
+        if (quick === 'tender' && l.projectType !== 'Traditional Tender') return false;
         return true;
       });
 
@@ -1426,7 +1515,6 @@
       renderMetrics(data);
       renderBars(data);
       renderHeatmap(data);
-      renderStatusChart(data);
       renderTradeMenu(data);
       renderTable(data);
     }
@@ -1453,35 +1541,11 @@
       return entries.length ? entries[0][0] : '-';
     }
 
-    function animateValue(element, finalValue) {
-      if (isNaN(finalValue)) {
-        element.textContent = finalValue;
-        return;
-      }
-      let current = 0;
-      const increment = Math.ceil(finalValue / 20);
-      const interval = setInterval(() => {
-        if (current < finalValue) {
-          current += increment;
-          element.textContent = Math.min(current, finalValue);
-        } else {
-          clearInterval(interval);
-        }
-      }, 30);
-    }
-
     function renderMetrics(data) {
-      animateValue(document.getElementById('mTotal'), data.length);
-      animateValue(document.getElementById('mHigh'), data.filter(l => ['High','Critical'].includes(l.impactLevel)).length);
-      const openCount = data.filter(l => ['Open','In Progress','Requires Management Action'].includes(l.status)).length;
-      animateValue(document.getElementById('mOpen'), openCount);
-      
-      if (data.length > 0) {
-        const openActionProgress = (openCount / data.length) * 100;
-        document.getElementById('openActionProgress').style.width = Math.min(openActionProgress, 100) + '%';
-      }
-
-      animateValue(document.getElementById('mTradeLessons'), Object.keys(countBy(data, 'trade', true)).length);
+      document.getElementById('mTotal').textContent = data.length;
+      document.getElementById('mHigh').textContent = data.filter(l => ['High','Critical'].includes(l.impactLevel)).length;
+      document.getElementById('mOpen').textContent = data.filter(l => ['Open','In Progress','Requires Management Action'].includes(l.status)).length;
+      document.getElementById('mTradeLessons').textContent = Object.keys(countBy(data, 'trade', true)).length;
       document.getElementById('mTopCause').textContent = topKey(countBy(data, 'rootCause'));
     }
 
@@ -1504,53 +1568,8 @@
       document.getElementById('impactHeatmap').innerHTML = impacts.map(i => {
         const c = map[i] || 0;
         const opacity = 0.08 + (c / max) * 0.35;
-        return `<div class="heat-cell"><span>${escapeHtml(i)}</span><strong>${c}</strong></div>`;
+        return `<div class="heat-cell" style="background:rgba(102,126,234,${opacity})"><span>${escapeHtml(i)}</span><strong>${c}</strong></div>`;
       }).join('');
-    }
-
-    function renderStatusChart(data) {
-      const map = countBy(data, 'status');
-      const ctx = document.getElementById('statusChart')?.getContext('2d');
-      if (!ctx) return;
-
-      if (statusChartInstance) {
-        statusChartInstance.destroy();
-      }
-
-      const colors = {
-        'Open': '#dc2626',
-        'In Progress': '#d97706',
-        'Closed': '#059669',
-        'Converted to Checklist': '#2563eb',
-        'Requires Management Action': '#7c3aed'
-      };
-
-      statusChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(map),
-          datasets: [{
-            data: Object.values(map),
-            backgroundColor: Object.keys(map).map(k => colors[k] || '#667eea'),
-            borderColor: 'rgba(255,255,255,0.95)',
-            borderWidth: 3,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                font: { size: 11, weight: '700' },
-                padding: 12,
-                usePointStyle: true,
-              }
-            }
-          }
-        }
-      });
     }
 
     let selectedTradeForMenu = '';
@@ -1580,12 +1599,12 @@
       const selectedLessons = tradeMap[selectedTradeForMenu] || [];
       document.getElementById('tradeLessonDetail').innerHTML = `
         <h3>${escapeHtml(selectedTradeForMenu)} — Cumulative Lessons</h3>
-        <p style="margin:0 0 10px; color:var(--muted); font-size:12px; line-height:1.35;">Use this before pricing, sending supplier inquiries, reviewing quotes, or preparing RFIs for this trade.</p>
+        <p style="margin:0 0 8px; color:var(--muted); font-size:12px; line-height:1.35;">Use this before pricing, sending supplier inquiries, reviewing quotes, or preparing RFIs for this trade.</p>
         ${selectedLessons.map(l => `
           <div class="trade-summary-item">
             <strong>${escapeHtml(l.lessonLearned)}</strong>
-            <p><b>🎯 Action:</b> ${escapeHtml(l.toBeDone)}</p>
-            <p><b>🔍 Root Cause:</b> ${escapeHtml(l.rootCause || '-')} | <b>📍 Project:</b> ${escapeHtml(l.projectName || '-')}</p>
+            <p><b>Action:</b> ${escapeHtml(l.toBeDone)}</p>
+            <p><b>Root Cause:</b> ${escapeHtml(l.rootCause || '-')} | <b>Project:</b> ${escapeHtml(l.projectName || '-')}</p>
             <div>${pill(l.impactLevel, 'impact')} ${pill(l.status, 'status')}</div>
           </div>
         `).join('')}
@@ -1600,8 +1619,8 @@
     function renderTable(data) {
       const tbody = document.getElementById('lessonTable');
       const empty = document.getElementById('emptyState');
-      tbody.innerHTML = data.map((l, idx) => `
-        <tr style="animation-delay: ${idx * 30}ms">
+      tbody.innerHTML = data.map(l => `
+        <tr>
           <td>${escapeHtml(l.date)}</td>
           <td>${(l.category || []).map(x => pill(x,'category')).join('')}</td>
           <td>${pill(l.impactLevel,'impact')}</td>
@@ -1627,110 +1646,51 @@
       document.getElementById('lessonForm').reset();
       document.getElementById('lessonId').value = '';
       document.getElementById('date').value = new Date().toISOString().slice(0,10);
-      document.getElementById('entryTitle').textContent = '📝 New Lesson';
-      tempNewItems = { category: [], fitoutType: [], projectType: [] };
-      clearInlineChips();
+      document.getElementById('entryTitle').textContent = '✏️ New Lesson';
+      renderFormSelects();
       if (id) editLesson(id);
       document.getElementById('entryModal').style.display = 'flex';
     }
 
     function closeEntryModal() { 
       document.getElementById('entryModal').style.display = 'none'; 
-      tempNewItems = { category: [], fitoutType: [], projectType: [] };
     }
 
-    function clearInlineChips() {
-      document.getElementById('newCategoryChips').innerHTML = '';
-      document.getElementById('newFitoutTypeChips').innerHTML = '';
-      document.getElementById('newProjectTypeChips').innerHTML = '';
-    }
-
-    function addNewCategory() {
-      const input = document.getElementById('newCategory');
-      const value = input.value.trim();
-      if (!value) return;
-      if (!tempNewItems.category.includes(value)) {
-        tempNewItems.category.push(value);
-      }
-      input.value = '';
-      renderInlineChips();
-    }
-
-    function addNewFitoutType() {
-      const input = document.getElementById('newFitoutType');
-      const value = input.value.trim();
-      if (!value) return;
-      if (!tempNewItems.fitoutType.includes(value)) {
-        tempNewItems.fitoutType.push(value);
-      }
-      input.value = '';
-      renderInlineChips();
-    }
-
-    function addNewProjectType() {
-      const input = document.getElementById('newProjectType');
-      const value = input.value.trim();
-      if (!value) return;
-      if (!tempNewItems.projectType.includes(value)) {
-        tempNewItems.projectType.push(value);
-      }
-      input.value = '';
-      renderInlineChips();
-    }
-
-    function removeInlineItem(type, value) {
-      tempNewItems[type] = tempNewItems[type].filter(v => v !== value);
-      renderInlineChips();
-    }
-
-    function renderInlineChips() {
-      document.getElementById('newCategoryChips').innerHTML = tempNewItems.category.map(v => 
-        `<span class="inline-chip">${escapeHtml(v)} <button type="button" onclick="removeInlineItem('category', '${escapeHtml(v).replace(/'/g, "\\'")}')">×</button></span>`
-      ).join('');
-      
-      document.getElementById('newFitoutTypeChips').innerHTML = tempNewItems.fitoutType.map(v => 
-        `<span class="inline-chip">${escapeHtml(v)} <button type="button" onclick="removeInlineItem('fitoutType', '${escapeHtml(v).replace(/'/g, "\\'")}')">×</button></span>`
-      ).join('');
-      
-      document.getElementById('newProjectTypeChips').innerHTML = tempNewItems.projectType.map(v => 
-        `<span class="inline-chip">${escapeHtml(v)} <button type="button" onclick="removeInlineItem('projectType', '${escapeHtml(v).replace(/'/g, "\\'")}')">×</button></span>`
-      ).join('');
+    function renderFormSelects() {
+      createSingleSelect('impactLevelWrapper', options.impactLevel, '');
+      createCustomSelect('categoryWrapper', options.category, []);
+      createSingleSelect('fitoutTypeWrapper', options.fitoutType, '');
+      createSingleSelect('projectTypeWrapper', options.projectType, '');
+      createSingleSelect('sourceWrapper', options.source, '');
+      createCustomSelect('tagsWrapper', options.tags, []);
+      createCustomSelect('tradeWrapper', options.trade, []);
+      createSingleSelect('rootCauseWrapper', options.rootCause, '');
+      createSingleSelect('phaseWrapper', options.phase, '');
+      createSingleSelect('statusWrapper', options.status, '');
+      createSingleSelect('responsibleWrapper', options.responsible, '');
     }
 
     function saveLesson(e) {
       e.preventDefault();
       const id = document.getElementById('lessonId').value || crypto.randomUUID();
-      
-      // Add new items to options if they don't exist
-      tempNewItems.category.forEach(v => {
-        if (!options.category.includes(v)) options.category.push(v);
-      });
-      tempNewItems.fitoutType.forEach(v => {
-        if (!options.fitoutType.includes(v)) options.fitoutType.push(v);
-      });
-      tempNewItems.projectType.forEach(v => {
-        if (!options.projectType.includes(v)) options.projectType.push(v);
-      });
-      saveOptions();
-
       const entry = {
         id,
         date: document.getElementById('date').value,
-        category: selectedValues('category'),
-        impactLevel: document.getElementById('impactLevel').value,
+        category: selectedValues('categoryWrapper'),
+        impactLevel: getSelectedValue('impactLevelWrapper'),
         lessonLearned: document.getElementById('lessonLearned').value.trim(),
         whyLesson: document.getElementById('whyLesson').value.trim(),
         toBeDone: document.getElementById('toBeDone').value.trim(),
         projectName: document.getElementById('projectName').value.trim(),
-        fitoutType: document.getElementById('fitoutType').value,
-        projectType: document.getElementById('projectType').value,
-        source: document.getElementById('source').value,
-        tags: selectedValues('tags'),
-        trade: selectedValues('trade'),
-        rootCause: document.getElementById('rootCause').value,
-        phase: document.getElementById('phase').value,
-        status: document.getElementById('status').value,
-        responsible: document.getElementById('responsible').value,
+        fitoutType: getSelectedValue('fitoutTypeWrapper'),
+        projectType: getSelectedValue('projectTypeWrapper'),
+        source: getSelectedValue('sourceWrapper'),
+        tags: selectedValues('tagsWrapper'),
+        trade: selectedValues('tradeWrapper'),
+        rootCause: getSelectedValue('rootCauseWrapper'),
+        phase: getSelectedValue('phaseWrapper'),
+        status: getSelectedValue('statusWrapper'),
+        responsible: getSelectedValue('responsibleWrapper'),
         costImpact: document.getElementById('costImpact').value.trim(),
         checklistItem: document.getElementById('checklistItem').value.trim()
       };
@@ -1746,18 +1706,34 @@
       if (!l) return;
       document.getElementById('entryTitle').textContent = '✏️ Edit Lesson';
       document.getElementById('lessonId').value = l.id;
-      ['date','impactLevel','lessonLearned','whyLesson','toBeDone','projectName','fitoutType','projectType','source','rootCause','phase','status','responsible','costImpact','checklistItem'].forEach(k => {
-        const el = document.getElementById(k);
-        if (el) el.value = l[k] || '';
-      });
-      setMulti('category', l.category || []);
-      setMulti('tags', l.tags || []);
-      setMulti('trade', l.trade || []);
+      document.getElementById('date').value = l.date || '';
+      document.getElementById('lessonLearned').value = l.lessonLearned || '';
+      document.getElementById('whyLesson').value = l.whyLesson || '';
+      document.getElementById('toBeDone').value = l.toBeDone || '';
+      document.getElementById('projectName').value = l.projectName || '';
+      document.getElementById('costImpact').value = l.costImpact || '';
+      document.getElementById('checklistItem').value = l.checklistItem || '';
+      
+      renderFormSelects();
+      
+      // Set selected values
+      createSingleSelect('impactLevelWrapper', options.impactLevel, l.impactLevel || '');
+      createCustomSelect('categoryWrapper', options.category, l.category || []);
+      createSingleSelect('fitoutTypeWrapper', options.fitoutType, l.fitoutType || '');
+      createSingleSelect('projectTypeWrapper', options.projectType, l.projectType || '');
+      createSingleSelect('sourceWrapper', options.source, l.source || '');
+      createCustomSelect('tagsWrapper', options.tags, l.tags || []);
+      createCustomSelect('tradeWrapper', options.trade, l.trade || []);
+      createSingleSelect('rootCauseWrapper', options.rootCause, l.rootCause || '');
+      createSingleSelect('phaseWrapper', options.phase, l.phase || '');
+      createSingleSelect('statusWrapper', options.status, l.status || '');
+      createSingleSelect('responsibleWrapper', options.responsible, l.responsible || '');
+      
       document.getElementById('entryModal').style.display = 'flex';
     }
 
     function deleteLesson(id) {
-      if (!confirm('🗑️ Delete this lesson learned record?')) return;
+      if (!confirm('Delete this lesson learned record?')) return;
       lessons = lessons.filter(l => l.id !== id);
       persistLessons();
       render();
@@ -1776,22 +1752,24 @@
       document.getElementById('settingsModal').style.display = 'flex';
     }
 
-    function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+    function closeSettings() { 
+      document.getElementById('settingsModal').style.display = 'none'; 
+    }
 
     function renderDropdownAdmin() {
       const labels = {
         category: 'Category', impactLevel: 'Impact Level', fitoutType: 'Fitout Type', projectType: 'Project Type', source: 'Source', tags: 'Tags', trade: 'Trade', rootCause: 'Root Cause', phase: 'Project Phase', status: 'Status', responsible: 'Responsible Person / Team'
       };
       document.getElementById('dropdownAdmin').innerHTML = Object.keys(defaultOptions).map(key => `
-        <div class="card" style="box-shadow:none; border-radius:14px; border: 1px solid var(--line);">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+        <div class="card" style="box-shadow:none; border-radius:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
             <strong>${labels[key]}</strong>
             <div style="display:flex; gap:8px; width:min(460px, 100%);">
-              <input id="add_${key}" placeholder="Add new ${labels[key]} option" style="font-size:12px;" />
-              <button class="blue" onclick="addOption('${key}')" style="width:100px;">Add</button>
+              <input id="add_${key}" placeholder="Add new ${labels[key]} option" />
+              <button class="blue" style="padding:8px 12px; font-size:11px;" onclick="addOption('${key}')">+ Add</button>
             </div>
           </div>
-          <div class="chips">${(options[key] || []).map(v => `<span class="chip">${escapeHtml(v)} <button onclick="removeOption('${key}', '${escapeHtml(v).replace(/'/g, "\'")}')">×</button></span>`).join('')}</div>
+          <div class="chips">${(options[key] || []).map(v => `<span class="chip">${escapeHtml(v)} <button onclick="removeOption('${key}', '${escapeHtml(v).replace(/'/g, "\\'")}')">×</button></span>`).join('')}</div>
         </div>
       `).join('');
     }
