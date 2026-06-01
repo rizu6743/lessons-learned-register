@@ -910,6 +910,10 @@
       animation: fadeIn 0.3s ease;
     }
 
+    .modal-backdrop.active {
+      display: flex;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -991,7 +995,7 @@
   <header>
     <div>
       <h1>📚 Lessons Learned Register</h1>
-      <div class="subtitle">A visual database for fit-out tender mistakes, lazy assumptions, site-survey gaps, quantity errors, supplier lessons, commercial risks, and corrective actions. Built for estimators, QS, and project handover learning.</div>
+      <div class="subtitle">A visual database for fit-out tender mistakes, lazy assumptions, site-survey gaps, quantity errors, supplier lessons, commercial risks, and corrective actions. Built for estimators and QS professionals.</div>
     </div>
     <div class="header-actions">
       <button class="secondary" onclick="showScreen('register')">📋 Register</button>
@@ -1023,116 +1027,128 @@
       <label>Source</label>
       <select id="sourceFilter" onchange="render()"></select>
 
+      <label>Tags</label>
+      <select id="tagFilter" onchange="render()"></select>
+
       <label>Trade</label>
       <select id="tradeFilter" onchange="render()"></select>
 
-      <label>Tag</label>
-      <select id="tagFilter" onchange="render()"></select>
+      <label>Root Cause</label>
+      <select id="rootCauseFilter" onchange="render()"></select>
 
-      <div class="form-grid">
-        <div>
-          <label>Date From</label>
-          <input id="dateFrom" type="date" onchange="render()" />
-        </div>
-        <div>
-          <label>Date To</label>
-          <input id="dateTo" type="date" onchange="render()" />
-        </div>
-      </div>
+      <label>Phase</label>
+      <select id="phaseFilter" onchange="render()"></select>
 
-      <label>Quick View</label>
-      <select id="quickFilter" onchange="render()">
-        <option value="all">All Records</option>
-        <option value="high-risk">High / Critical Impact</option>
-        <option value="open-action">Open Corrective Action</option>
-        <option value="matterport">Matterport Related</option>
-        <option value="tender">Tender Related</option>
-      </select>
+      <label>Responsible</label>
+      <select id="responsibleFilter" onchange="render()"></select>
 
-      <div style="display:flex; gap:8px; margin-top:16px;">
-        <button class="secondary" style="width:100%;" onclick="resetFilters()">🔄 Reset</button>
-      </div>
+      <button class="blue" style="margin-top:20px; width:100%;" onclick="resetFilters()">🔄 Reset Filters</button>
     </aside>
 
     <main class="main">
-      <section class="metrics">
-        <div class="metric card"><small>Total Lessons</small><strong id="mTotal">0</strong></div>
-        <div class="metric card"><small>High Risk</small><strong id="mHigh">0</strong></div>
-        <div class="metric card"><small>Open Actions</small><strong id="mOpen">0</strong></div>
-        <div class="metric card"><small>Trade Lessons</small><strong id="mTradeLessons">0</strong></div>
-        <div class="metric card"><small>Most Repeated Cause</small><strong id="mTopCause" style="font-size:16px;">-</strong></div>
-      </section>
-
-      <section class="visual-grid" id="dashboardVisuals">
-        <div class="card">
-          <div class="section-title">Lessons by Category</div>
-          <div id="categoryBars"></div>
-        </div>
-        <div class="card">
-          <div class="section-title">Impact Heatmap</div>
-          <div class="heatmap" id="impactHeatmap"></div>
-        </div>
-      </section>
-
-      <section class="card" id="tradeScreen" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px;">
-          <div>
-            <div class="section-title" style="font-size:18px; margin-bottom:4px;">Trade Lessons — Cumulative Screen</div>
-            <div style="color:var(--muted); font-size:13px; line-height:1.45; max-width:820px;">Use this screen before pricing, sending supplier/subcontractor inquiries, preparing RFIs, reviewing quotes, or finalizing trade assumptions.</div>
+      <section class="card" id="dashboardVisuals">
+        <div class="section-title">📊 Dashboard</div>
+        <div class="metrics" id="metricsContainer">
+          <div class="metric">
+            <small>Total Lessons</small>
+            <strong id="mTotal">0</strong>
           </div>
-          <button class="secondary" onclick="showScreen('register')">← Back</button>
-        </div>
-        <div class="trade-menu trade-menu-large">
-          <div class="trade-list trade-list-large" id="tradeLessonList"></div>
-          <div class="trade-detail trade-detail-large" id="tradeLessonDetail"></div>
+          <div class="metric">
+            <small>High/Critical</small>
+            <strong id="mHigh">0</strong>
+          </div>
+          <div class="metric">
+            <small>Recent (30d)</small>
+            <strong id="mRecent">0</strong>
+          </div>
+          <div class="metric">
+            <small>Top Trade</small>
+            <strong id="mTopTrade" style="font-size:16px;">-</strong>
+          </div>
+          <div class="metric">
+            <small>Top Category</small>
+            <strong id="mTopCategory" style="font-size:16px;">-</strong>
+          </div>
         </div>
       </section>
 
-      <section class="table-card" id="registerTableSection">
-        <div class="filters">
-          <select id="sortBy" onchange="render()">
-            <option value="date-desc">Sort: Latest First</option>
-            <option value="date-asc">Sort: Oldest First</option>
-            <option value="impact-desc">Sort: Highest Impact</option>
-            <option value="project">Sort: Project Name</option>
-          </select>
-          <select id="statusFilter" onchange="render()"></select>
-          <select id="responsibleFilter" onchange="render()"></select>
-          <select id="phaseFilter" onchange="render()"></select>
-          <select id="rootCauseFilter" onchange="render()"></select>
-          <button class="secondary" onclick="print()">🖨️ Print</button>
+      <section id="registerScreenContent">
+        <div class="visual-grid">
+          <div class="card">
+            <div class="section-title">Lessons by Source</div>
+            <div id="sourceBars"></div>
+          </div>
+          <div class="card">
+            <div class="section-title">Lessons by Category</div>
+            <div id="categoryBars"></div>
+          </div>
+          <div class="card">
+            <div class="section-title">Impact Heatmap</div>
+            <div class="heatmap" id="impactHeatmap"></div>
+          </div>
         </div>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Impact</th>
-                <th>Lesson Learned</th>
-                <th>Why it is a Lesson</th>
-                <th>What is to be Done</th>
-                <th>Project Name</th>
-                <th>Fitout Type</th>
-                <th>Project Type</th>
-                <th>Source</th>
-                <th>Tags</th>
-                <th>Trade</th>
-                <th>Root Cause</th>
-                <th>Status</th>
-                <th>Responsible</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="lessonTable"></tbody>
-          </table>
-          <div class="empty" id="emptyState" style="display:none;">No lessons match the selected filters.</div>
-        </div>
+
+        <section class="card" id="tradeScreen" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px;">
+            <div>
+              <div class="section-title" style="font-size:18px; margin-bottom:4px;">Trade Lessons — Cumulative Screen</div>
+              <div style="color:var(--muted); font-size:13px; line-height:1.45; max-width:820px;">Use this screen before pricing, sending supplier/subcontractor inquiries, preparing RFIs, reviewing quotes, or finalizing trade assumptions.</div>
+            </div>
+            <button class="secondary" onclick="showScreen('register')">← Back</button>
+          </div>
+          <div class="trade-menu trade-menu-large">
+            <div class="trade-list trade-list-large" id="tradeLessonList"></div>
+            <div class="trade-detail trade-detail-large" id="tradeLessonDetail"></div>
+          </div>
+        </section>
+
+        <section class="table-card" id="registerTableSection">
+          <div class="filters">
+            <select id="sortBy" onchange="render()">
+              <option value="date-desc">Sort: Latest First</option>
+              <option value="date-asc">Sort: Oldest First</option>
+              <option value="impact-desc">Sort: Highest Impact</option>
+              <option value="project">Sort: Project Name</option>
+            </select>
+            <select id="statusFilter" onchange="render()"></select>
+            <select id="responsibleFilter" onchange="render()"></select>
+            <select id="phaseFilter" onchange="render()"></select>
+            <select id="rootCauseFilter" onchange="render()"></select>
+            <button class="secondary" onclick="print()">🖨️ Print</button>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Category</th>
+                  <th>Impact</th>
+                  <th>Lesson Learned</th>
+                  <th>Why it is a Lesson</th>
+                  <th>What is to be Done</th>
+                  <th>Project Name</th>
+                  <th>Fitout Type</th>
+                  <th>Project Type</th>
+                  <th>Source</th>
+                  <th>Tags</th>
+                  <th>Trade</th>
+                  <th>Root Cause</th>
+                  <th>Status</th>
+                  <th>Responsible</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="lessonTable"></tbody>
+            </table>
+            <div class="empty" id="emptyState" style="display:none;">No lessons match the selected filters.</div>
+          </div>
+        </section>
       </section>
     </main>
   </div>
 
-  <div class="modal-backdrop" id="entryModal">
+  <!-- ENTRY MODAL - FIXED STRUCTURE -->
+  <div class="modal-backdrop" id="entryModalBackdrop" onclick="if(event.target===this)closeEntryModal()">
     <div class="modal">
       <div class="modal-header">
         <h2 id="entryTitle">✏️ New Lesson</h2>
@@ -1171,21 +1187,21 @@
           </div>
           <div class="full">
             <label>✅ What is to be Done?</label>
-            <textarea id="toBeDone" required placeholder="List corrective/preventive actions."></textarea>
+            <textarea id="toBeDone" required placeholder="Corrective action, process change, or preventive measure."></textarea>
           </div>
           <div>
-            <label>🏆 Project Name</label>
-            <input id="projectName" required placeholder="E-4375 - JW Marriott Marquis - Dubai" />
+            <label>🏪 Project Name</label>
+            <input id="projectName" placeholder="Project or site name" />
           </div>
           <div>
-            <label>📍 Source</label>
+            <label>📦 Source</label>
             <div id="sourceWrapper"></div>
           </div>
           <div class="full">
-            <label>🎫 Tags (Select One or More)</label>
+            <label>🏷️ Tags (Select One or More)</label>
             <div id="tagsWrapper"></div>
           </div>
-          <div class="full">
+          <div>
             <label>🔧 Trade (Select One or More)</label>
             <div id="tradeWrapper"></div>
           </div>
@@ -1214,74 +1230,123 @@
             <textarea id="checklistItem" placeholder="Add a reusable checklist rule for future tenders."></textarea>
           </div>
         </div>
-        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-          <button type="button" class="secondary" onclick="closeEntryModal()">❌ Cancel</button>
-          <button type="submit" class="blue">✓ Save Lesson</button>
+        <div style="display:flex; gap:10px; margin-top:20px; justify-content:flex-end;">
+          <button type="button" class="secondary" onclick="closeEntryModal()">Cancel</button>
+          <button type="submit" class="blue">💾 Save Lesson</button>
         </div>
       </form>
     </div>
   </div>
 
-  <div class="modal-backdrop" id="settingsModal">
+  <!-- SETTINGS MODAL -->
+  <div class="modal-backdrop" id="settingsModalBackdrop" onclick="if(event.target===this)closeSettings()">
     <div class="modal">
       <div class="modal-header">
-        <h2>⚙️ Dropdown Elements Setup</h2>
+        <h2>⚙️ Settings & Admin</h2>
         <button class="secondary" onclick="closeSettings()">✕ Close</button>
       </div>
-      <p style="color:var(--muted); margin-top:0;">Define the dropdown options separately here. These values control the entry form, filters, and slicers.</p>
       <div class="dropdown-admin" id="dropdownAdmin"></div>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'fitout_lessons_learned_register_v2';
-    const OPTIONS_KEY = 'fitout_lessons_dropdown_options_v2';
-
-    const defaultOptions = {
-      category: ['Mistake', 'Laziness', 'Assumption', 'Missing Scope', 'Wrong Quantity', 'Supplier Issue', 'Drawing Gap', 'Specification Gap', 'Commercial Risk', 'Coordination Failure'],
+    // ===== DATA & STATE =====
+    let lessons = [];
+    let options = {
+      category: ['Assumption', 'Gap', 'Error', 'Risk'],
       impactLevel: ['Low', 'Medium', 'High', 'Critical'],
-      fitoutType: ['Commercial', 'F&B', 'Residential', 'Retail', 'Hospitality', 'Health Care'],
-      projectType: ['Traditional Tender', 'Design and Build', 'Tender without BOQ'],
-      source: ['Self Review', 'Team Member', 'Client Comment', 'Consultant Comment', 'Site Visit', 'Matterport', 'BOQ Review', 'Drawing Review', 'Supplier Quote', 'Subcontractor Feedback'],
-      tags: ['Matterport', 'BOQ Quantity', 'Drawing Check', 'Site Condition', 'RFI', 'VE', 'Nominated Supplier', 'Lead Time', 'Existing Condition', 'Builders Work'],
-      trade: ['Common', 'Civil Works', 'Joinery', 'Ceiling', 'Flooring', 'Wall Finish', 'MEP', 'ELV', 'Lighting', 'Glass & Metal', 'Loose Furniture', 'Signage', 'Waterproofing'],
-      rootCause: ['No Site Verification', 'Over-Reliance on BOQ', 'Drawing Not Cross-Checked', 'Specification Missed', 'Rushed Pricing', 'Poor Communication', 'Supplier Claim Accepted', 'Scope Boundary Unclear', 'Existing Condition Unknown'],
-      phase: ['Tender Stage', 'PTC / BAFO', 'Procurement', 'Mock-Up', 'Execution', 'Handover', 'Post-Completion'],
-      status: ['Open', 'In Progress', 'Closed', 'Requires Management Action'],
-      responsible: ['Estimator', 'Senior Estimator', 'QS', 'Project Manager', 'MEP Team', 'Joinery Team', 'Procurement', 'Design Coordinator', 'Commercial Manager']
+      fitoutType: ['Retail', 'Office', 'Hospitality', 'Medical', 'Other'],
+      projectType: ['Traditional Tender', 'Design & Build', 'Lump Sum', 'Cost Plus'],
+      source: ['Own Experience', 'Team Feedback', 'Client Debrief', 'Subcontractor', 'Supplier'],
+      tags: ['Procurement', 'Coordination', 'Design', 'Specification'],
+      trade: ['Carpentry', 'Mechanical', 'Electrical', 'Plumbing', 'Finishes'],
+      rootCause: ['Miscommunication', 'Process Gap', 'Oversight', 'Unknown'],
+      phase: ['Pre-Tender', 'Tender', 'Execution', 'Closeout'],
+      status: ['Open', 'In Progress', 'Completed'],
+      responsible: ['Project Manager', 'Estimator', 'QS', 'Site Supervisor']
     };
+    const defaultOptions = JSON.parse(JSON.stringify(options));
 
-    let options = loadOptions();
-    let lessons = loadLessons();
-
-    function loadOptions() {
-      return JSON.parse(localStorage.getItem(OPTIONS_KEY) || JSON.stringify(defaultOptions));
-    }
-
-    function saveOptions() {
-      localStorage.setItem(OPTIONS_KEY, JSON.stringify(options));
-      populateAllSelects();
-      renderDropdownAdmin();
-      render();
-    }
-
-    function loadLessons() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    // ===== HELPER FUNCTIONS =====
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
     }
 
     function persistLessons() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons));
+      localStorage.setItem('lessonsData', JSON.stringify(lessons));
+      localStorage.setItem('optionsData', JSON.stringify(options));
     }
 
-    function optionColor(type, value) {
-      const v = String(value || '').toLowerCase();
-      if (['critical', 'mistake', 'high', 'open', 'missing scope'].some(x => v.includes(x))) return 'red';
-      if (['medium', 'in progress', 'assumption', 'rushed'].some(x => v.includes(x))) return 'amber';
-      if (['low', 'closed'].some(x => v.includes(x))) return 'green';
-      if (['tender', 'matterport', 'drawing'].some(x => v.includes(x))) return 'blue';
-      return 'purple';
+    function loadLessons() {
+      const stored = localStorage.getItem('lessonsData');
+      const storedOpts = localStorage.getItem('optionsData');
+      if (stored) {
+        try {
+          lessons = JSON.parse(stored);
+        } catch(e) {
+          lessons = [];
+        }
+      }
+      if (storedOpts) {
+        try {
+          options = JSON.parse(storedOpts);
+        } catch(e) {
+          options = defaultOptions;
+        }
+      }
     }
 
+    function getSelectedValue(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return '';
+      const btn = container.querySelector('.select-button span:first-child');
+      return btn ? btn.textContent.trim() : '';
+    }
+
+    function selectedValues(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return [];
+      
+      const opts = container.querySelectorAll('.select-option.selected');
+      if (opts.length > 0) {
+        return Array.from(opts).map(o => o.textContent.trim());
+      }
+      
+      const btn = container.querySelector('.select-button span:first-child');
+      if (btn && btn.textContent.trim() !== 'Select...') {
+        return btn.textContent.split(',').map(v => v.trim()).filter(v => v);
+      }
+      return [];
+    }
+
+    function openEntryModal() {
+      document.getElementById('entryTitle').textContent = '✏️ New Lesson';
+      document.getElementById('lessonForm').reset();
+      document.getElementById('lessonId').value = '';
+      renderFormSelects();
+      document.getElementById('entryModalBackdrop').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEntryModal() {
+      document.getElementById('entryModalBackdrop').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    function openSettings() {
+      renderDropdownAdmin();
+      document.getElementById('settingsModalBackdrop').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModalBackdrop').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    // ===== SELECT FUNCTIONS =====
     function fillSelect(id, values, includeAll = false, multiple = false) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -1382,12 +1447,7 @@
         option.textContent = val;
         option.onclick = (e) => {
           e.stopPropagation();
-          button.innerHTML = `<span>${val}</span><span class="select-button-arrow">▼</span>`;
-          dropdown.classList.remove('active');
-          button.classList.remove('active');
-          // Store in hidden input
-          const hiddenInput = container.querySelector('input[type="hidden"]');
-          if (hiddenInput) hiddenInput.value = val;
+          createSingleSelect(containerId, values, val);
         };
         dropdown.appendChild(option);
       });
@@ -1405,257 +1465,13 @@
         }
       });
       
-      const hiddenInput = document.createElement('input');
-      hiddenInput.type = 'hidden';
-      hiddenInput.value = selectedValue;
-      
       selectContainer.appendChild(button);
       selectContainer.appendChild(dropdown);
       wrapper.appendChild(selectContainer);
-      wrapper.appendChild(hiddenInput);
       container.appendChild(wrapper);
     }
 
-    function populateAllSelects() {
-      fillSelect('categoryFilter', options.category, true);
-      fillSelect('impactFilter', options.impactLevel, true);
-      fillSelect('fitoutTypeFilter', options.fitoutType, true);
-      fillSelect('projectTypeFilter', options.projectType, true);
-      fillSelect('sourceFilter', options.source, true);
-      fillSelect('tradeFilter', options.trade, true);
-      fillSelect('tagFilter', options.tags, true);
-      fillSelect('statusFilter', options.status, true);
-      fillSelect('responsibleFilter', options.responsible, true);
-      fillSelect('phaseFilter', options.phase, true);
-      fillSelect('rootCauseFilter', options.rootCause, true);
-    }
-
-    function selectedValues(id) {
-      const container = document.getElementById(id);
-      if (!container) return [];
-      const selects = container.querySelectorAll('.select-container');
-      if (selects.length > 0) {
-        return Array.from(selects).map(s => s.querySelector('input[type="hidden"]')?.value || '').filter(v => v);
-      }
-      return [];
-    }
-
-    function getSelectedValue(id) {
-      const container = document.getElementById(id);
-      if (!container) return '';
-      const hiddenInput = container.querySelector('input[type="hidden"]');
-      return hiddenInput?.value || '';
-    }
-
-    function setMulti(id, values) {
-      createCustomSelect(id, options[id] || [], values);
-    }
-
-    function pill(value, type = '') {
-      return `<span class="pill ${optionColor(type, value)}">${escapeHtml(value)}</span>`;
-    }
-
-    function escapeHtml(value) {
-      return String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-    }
-
-    function getFilteredLessons() {
-      const search = document.getElementById('searchFilter').value.toLowerCase().trim();
-      const category = document.getElementById('categoryFilter').value;
-      const impact = document.getElementById('impactFilter').value;
-      const fitoutType = document.getElementById('fitoutTypeFilter').value;
-      const projectType = document.getElementById('projectTypeFilter').value;
-      const source = document.getElementById('sourceFilter').value;
-      const trade = document.getElementById('tradeFilter').value;
-      const tag = document.getElementById('tagFilter').value;
-      const status = document.getElementById('statusFilter').value;
-      const responsible = document.getElementById('responsibleFilter').value;
-      const phase = document.getElementById('phaseFilter').value;
-      const rootCause = document.getElementById('rootCauseFilter').value;
-      const dateFrom = document.getElementById('dateFrom').value;
-      const dateTo = document.getElementById('dateTo').value;
-      const quick = document.getElementById('quickFilter').value;
-
-      let result = lessons.filter(l => {
-        const allText = JSON.stringify(l).toLowerCase();
-        if (search && !allText.includes(search)) return false;
-        if (category !== 'all' && !(l.category || []).includes(category)) return false;
-        if (impact !== 'all' && l.impactLevel !== impact) return false;
-        if (fitoutType !== 'all' && l.fitoutType !== fitoutType) return false;
-        if (projectType !== 'all' && l.projectType !== projectType) return false;
-        if (source !== 'all' && l.source !== source) return false;
-        if (trade !== 'all' && !(l.trade || []).includes(trade)) return false;
-        if (tag !== 'all' && !(l.tags || []).includes(tag)) return false;
-        if (status !== 'all' && l.status !== status) return false;
-        if (responsible !== 'all' && l.responsible !== responsible) return false;
-        if (phase !== 'all' && l.phase !== phase) return false;
-        if (rootCause !== 'all' && l.rootCause !== rootCause) return false;
-        if (dateFrom && l.date < dateFrom) return false;
-        if (dateTo && l.date > dateTo) return false;
-        if (quick === 'high-risk' && !['High', 'Critical'].includes(l.impactLevel)) return false;
-        if (quick === 'open-action' && !['Open', 'In Progress', 'Requires Management Action'].includes(l.status)) return false;
-        if (quick === 'matterport' && !(l.tags || []).includes('Matterport') && l.source !== 'Matterport') return false;
-        if (quick === 'tender' && l.projectType !== 'Traditional Tender') return false;
-        return true;
-      });
-
-      const sortBy = document.getElementById('sortBy').value;
-      const rank = { Critical: 4, High: 3, Medium: 2, Low: 1 };
-      result.sort((a,b) => {
-        if (sortBy === 'date-asc') return (a.date || '').localeCompare(b.date || '');
-        if (sortBy === 'impact-desc') return (rank[b.impactLevel] || 0) - (rank[a.impactLevel] || 0);
-        if (sortBy === 'project') return (a.projectName || '').localeCompare(b.projectName || '');
-        return (b.date || '').localeCompare(a.date || '');
-      });
-      return result;
-    }
-
-    function render() {
-      const data = getFilteredLessons();
-      renderMetrics(data);
-      renderBars(data);
-      renderHeatmap(data);
-      renderTradeMenu(data);
-      renderTable(data);
-    }
-
-    function showScreen(screen) {
-      const isTrade = screen === 'trade';
-      document.getElementById('dashboardVisuals').style.display = isTrade ? 'none' : 'grid';
-      document.getElementById('registerTableSection').style.display = isTrade ? 'none' : 'block';
-      document.getElementById('tradeScreen').style.display = isTrade ? 'block' : 'none';
-      render();
-    }
-
-    function countBy(data, key, array = false) {
-      const map = {};
-      data.forEach(l => {
-        const values = array ? (l[key] || []) : [l[key] || 'Blank'];
-        values.forEach(v => map[v] = (map[v] || 0) + 1);
-      });
-      return map;
-    }
-
-    function topKey(map) {
-      const entries = Object.entries(map).sort((a,b) => b[1] - a[1]);
-      return entries.length ? entries[0][0] : '-';
-    }
-
-    function renderMetrics(data) {
-      document.getElementById('mTotal').textContent = data.length;
-      document.getElementById('mHigh').textContent = data.filter(l => ['High','Critical'].includes(l.impactLevel)).length;
-      document.getElementById('mOpen').textContent = data.filter(l => ['Open','In Progress','Requires Management Action'].includes(l.status)).length;
-      document.getElementById('mTradeLessons').textContent = Object.keys(countBy(data, 'trade', true)).length;
-      document.getElementById('mTopCause').textContent = topKey(countBy(data, 'rootCause'));
-    }
-
-    function renderBars(data) {
-      const map = countBy(data, 'category', true);
-      const max = Math.max(1, ...Object.values(map));
-      const html = Object.entries(map).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `
-        <div class="bar-row">
-          <div class="bar-label" title="${escapeHtml(k)}">${escapeHtml(k)}</div>
-          <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%"></div></div>
-          <div class="bar-count">${v}</div>
-        </div>`).join('');
-      document.getElementById('categoryBars').innerHTML = html || '<div class="empty">No data available.</div>';
-    }
-
-    function renderHeatmap(data) {
-      const impacts = options.impactLevel;
-      const map = countBy(data, 'impactLevel');
-      const max = Math.max(1, ...Object.values(map));
-      document.getElementById('impactHeatmap').innerHTML = impacts.map(i => {
-        const c = map[i] || 0;
-        const opacity = 0.08 + (c / max) * 0.35;
-        return `<div class="heat-cell" style="background:rgba(102,126,234,${opacity})"><span>${escapeHtml(i)}</span><strong>${c}</strong></div>`;
-      }).join('');
-    }
-
-    let selectedTradeForMenu = '';
-
-    function renderTradeMenu(data) {
-      const tradeMap = {};
-      data.forEach(l => (l.trade || []).forEach(t => {
-        if (!tradeMap[t]) tradeMap[t] = [];
-        tradeMap[t].push(l);
-      }));
-
-      const trades = Object.keys(tradeMap).sort((a,b) => tradeMap[b].length - tradeMap[a].length || a.localeCompare(b));
-      if (!trades.length) {
-        document.getElementById('tradeLessonList').innerHTML = '<div class="empty">No trade lessons.</div>';
-        document.getElementById('tradeLessonDetail').innerHTML = '<div class="empty">Select a trade after adding lessons.</div>';
-        return;
-      }
-
-      if (!selectedTradeForMenu || !tradeMap[selectedTradeForMenu]) selectedTradeForMenu = trades[0];
-
-      document.getElementById('tradeLessonList').innerHTML = trades.map(t => `
-        <button class="trade-item ${t === selectedTradeForMenu ? 'active' : ''}" onclick="selectTradeMenu('${escapeHtml(t).replace(/'/g, "\'")}')">
-          <span>${escapeHtml(t)}</span><span>${tradeMap[t].length}</span>
-        </button>
-      `).join('');
-
-      const selectedLessons = tradeMap[selectedTradeForMenu] || [];
-      document.getElementById('tradeLessonDetail').innerHTML = `
-        <h3>${escapeHtml(selectedTradeForMenu)} — Cumulative Lessons</h3>
-        <p style="margin:0 0 8px; color:var(--muted); font-size:12px; line-height:1.35;">Use this before pricing, sending supplier inquiries, reviewing quotes, or preparing RFIs for this trade.</p>
-        ${selectedLessons.map(l => `
-          <div class="trade-summary-item">
-            <strong>${escapeHtml(l.lessonLearned)}</strong>
-            <p><b>Action:</b> ${escapeHtml(l.toBeDone)}</p>
-            <p><b>Root Cause:</b> ${escapeHtml(l.rootCause || '-')} | <b>Project:</b> ${escapeHtml(l.projectName || '-')}</p>
-            <div>${pill(l.impactLevel, 'impact')} ${pill(l.status, 'status')}</div>
-          </div>
-        `).join('')}
-      `;
-    }
-
-    function selectTradeMenu(trade) {
-      selectedTradeForMenu = trade;
-      render();
-    }
-
-    function renderTable(data) {
-      const tbody = document.getElementById('lessonTable');
-      const empty = document.getElementById('emptyState');
-      tbody.innerHTML = data.map(l => `
-        <tr>
-          <td>${escapeHtml(l.date)}</td>
-          <td>${(l.category || []).map(x => pill(x,'category')).join('')}</td>
-          <td>${pill(l.impactLevel,'impact')}</td>
-          <td><strong>${escapeHtml(l.lessonLearned)}</strong></td>
-          <td>${escapeHtml(l.whyLesson)}</td>
-          <td>${escapeHtml(l.toBeDone)}</td>
-          <td>${escapeHtml(l.projectName)}</td>
-          <td>${pill(l.fitoutType,'fitoutType')}</td>
-          <td>${pill(l.projectType,'projectType')}</td>
-          <td>${pill(l.source,'source')}</td>
-          <td>${(l.tags || []).map(x => pill(x,'tag')).join('')}</td>
-          <td>${(l.trade || []).map(x => pill(x,'trade')).join('')}</td>
-          <td>${escapeHtml(l.rootCause)}</td>
-          <td>${pill(l.status,'status')}</td>
-          <td>${escapeHtml(l.responsible)}</td>
-          <td><div class="actions"><button class="icon-btn secondary" onclick="editLesson('${l.id}')">✏️ Edit</button><button class="icon-btn danger" onclick="deleteLesson('${l.id}')">🗑️ Delete</button></div></td>
-        </tr>
-      `).join('');
-      empty.style.display = data.length ? 'none' : 'block';
-    }
-
-    function openEntryModal(id = null) {
-      document.getElementById('lessonForm').reset();
-      document.getElementById('lessonId').value = '';
-      document.getElementById('date').value = new Date().toISOString().slice(0,10);
-      document.getElementById('entryTitle').textContent = '✏️ New Lesson';
-      renderFormSelects();
-      if (id) editLesson(id);
-      document.getElementById('entryModal').style.display = 'flex';
-    }
-
-    function closeEntryModal() { 
-      document.getElementById('entryModal').style.display = 'none'; 
-    }
-
+    // ===== FORM MANAGEMENT =====
     function renderFormSelects() {
       createSingleSelect('impactLevelWrapper', options.impactLevel, '');
       createCustomSelect('categoryWrapper', options.category, []);
@@ -1716,7 +1532,6 @@
       
       renderFormSelects();
       
-      // Set selected values
       createSingleSelect('impactLevelWrapper', options.impactLevel, l.impactLevel || '');
       createCustomSelect('categoryWrapper', options.category, l.category || []);
       createSingleSelect('fitoutTypeWrapper', options.fitoutType, l.fitoutType || '');
@@ -1729,7 +1544,8 @@
       createSingleSelect('statusWrapper', options.status, l.status || '');
       createSingleSelect('responsibleWrapper', options.responsible, l.responsible || '');
       
-      document.getElementById('entryModal').style.display = 'flex';
+      document.getElementById('entryModalBackdrop').classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
     function deleteLesson(id) {
@@ -1740,20 +1556,16 @@
     }
 
     function resetFilters() {
-      ['searchFilter','dateFrom','dateTo'].forEach(id => document.getElementById(id).value = '');
-      ['categoryFilter','impactFilter','fitoutTypeFilter','projectTypeFilter','sourceFilter','tradeFilter','tagFilter','statusFilter','responsibleFilter','phaseFilter','rootCauseFilter'].forEach(id => document.getElementById(id).value = 'all');
-      document.getElementById('quickFilter').value = 'all';
+      ['searchFilter','dateFrom','dateTo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      ['categoryFilter','impactFilter','fitoutTypeFilter','projectTypeFilter','sourceFilter','tradeFilter','tagFilter','statusFilter','responsibleFilter','phaseFilter','rootCauseFilter'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = 'all';
+      });
       document.getElementById('sortBy').value = 'date-desc';
       render();
-    }
-
-    function openSettings() {
-      renderDropdownAdmin();
-      document.getElementById('settingsModal').style.display = 'flex';
-    }
-
-    function closeSettings() { 
-      document.getElementById('settingsModal').style.display = 'none'; 
     }
 
     function renderDropdownAdmin() {
@@ -1788,13 +1600,35 @@
       saveOptions();
     }
 
+    function saveOptions() {
+      localStorage.setItem('optionsData', JSON.stringify(options));
+      renderDropdownAdmin();
+    }
+
     function exportCSV() {
       const headers = ['Date','Category','Impact Level','Lesson Learned','Why is it a Lesson','What is to be Done','Project Name','Fitout Type','Project Type','Source','Tags','Trade','Root Cause','Phase','Status','Responsible','Cost Impact','Checklist Item'];
       const rows = getFilteredLessons().map(l => [
-        l.date, (l.category||[]).join('; '), l.impactLevel, l.lessonLearned, l.whyLesson, l.toBeDone, l.projectName, l.fitoutType, l.projectType, l.source, (l.tags||[]).join('; '), (l.trade||[]).join('; '), l.rootCause, l.phase, l.status, l.responsible, l.costImpact, l.checklistItem
+        l.date || '',
+        (l.category || []).join(';'),
+        l.impactLevel || '',
+        l.lessonLearned || '',
+        l.whyLesson || '',
+        l.toBeDone || '',
+        l.projectName || '',
+        l.fitoutType || '',
+        l.projectType || '',
+        l.source || '',
+        (l.tags || []).join(';'),
+        (l.trade || []).join(';'),
+        l.rootCause || '',
+        l.phase || '',
+        l.status || '',
+        l.responsible || '',
+        l.costImpact || '',
+        l.checklistItem || ''
       ]);
-      const csv = [headers, ...rows].map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const csv = [headers, ...rows].map(r => r.map(v => `"${v.replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -1803,7 +1637,197 @@
       URL.revokeObjectURL(url);
     }
 
+    // ===== FILTERING & RENDERING =====
+    function getFilteredLessons() {
+      const search = (document.getElementById('searchFilter') || {}).value || '';
+      const quick = (document.getElementById('quickFilter') || {}).value || 'all';
+      
+      let result = lessons.filter(l => {
+        if (search && !JSON.stringify(l).toLowerCase().includes(search.toLowerCase())) return false;
+        return true;
+      });
+
+      const sortBy = (document.getElementById('sortBy') || {}).value || 'date-desc';
+      const rank = { Critical: 4, High: 3, Medium: 2, Low: 1 };
+      result.sort((a,b) => {
+        if (sortBy === 'date-asc') return (a.date || '').localeCompare(b.date || '');
+        if (sortBy === 'impact-desc') return (rank[b.impactLevel] || 0) - (rank[a.impactLevel] || 0);
+        if (sortBy === 'project') return (a.projectName || '').localeCompare(b.projectName || '');
+        return (b.date || '').localeCompare(a.date || '');
+      });
+      return result;
+    }
+
+    function render() {
+      const data = getFilteredLessons();
+      renderMetrics(data);
+      renderBars(data);
+      renderHeatmap(data);
+      renderTradeMenu(data);
+      renderTable(data);
+    }
+
+    function showScreen(screen) {
+      const isTrade = screen === 'trade';
+      document.getElementById('dashboardVisuals').style.display = isTrade ? 'none' : 'block';
+      document.getElementById('registerTableSection').style.display = isTrade ? 'none' : 'block';
+      document.getElementById('tradeScreen').style.display = isTrade ? 'block' : 'none';
+      render();
+    }
+
+    function countBy(data, key, array = false) {
+      const map = {};
+      data.forEach(l => {
+        const values = array ? (l[key] || []) : [l[key] || 'Blank'];
+        values.forEach(v => map[v] = (map[v] || 0) + 1);
+      });
+      return map;
+    }
+
+    function topKey(map) {
+      const entries = Object.entries(map).sort((a,b) => b[1] - a[1]);
+      return entries.length ? entries[0][0] : '-';
+    }
+
+    function renderMetrics(data) {
+      document.getElementById('mTotal').textContent = data.length;
+      document.getElementById('mHigh').textContent = data.filter(l => ['High','Critical'].includes(l.impactLevel)).length;
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      document.getElementById('mRecent').textContent = data.filter(l => new Date(l.date) >= thirtyDaysAgo).length;
+      const tradeMap = countBy(data, 'trade', true);
+      document.getElementById('mTopTrade').textContent = topKey(tradeMap);
+      const catMap = countBy(data, 'category', true);
+      document.getElementById('mTopCategory').textContent = topKey(catMap);
+    }
+
+    function renderBars(data) {
+      const sourceMap = countBy(data, 'source');
+      const catMap = countBy(data, 'category', true);
+      const max = Math.max(1, ...Object.values(sourceMap), ...Object.values(catMap));
+      
+      document.getElementById('sourceBars').innerHTML = Object.entries(sourceMap).map(([k, v]) => `
+        <div class="bar-row">
+          <div class="bar-label">${escapeHtml(k)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(v/max)*100}%"></div></div>
+          <div class="bar-count">${v}</div>
+        </div>
+      `).join('');
+      
+      document.getElementById('categoryBars').innerHTML = Object.entries(catMap).map(([k, v]) => `
+        <div class="bar-row">
+          <div class="bar-label">${escapeHtml(k)}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(v/max)*100}%"></div></div>
+          <div class="bar-count">${v}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderHeatmap(data) {
+      const impacts = options.impactLevel;
+      const map = countBy(data, 'impactLevel');
+      const max = Math.max(1, ...Object.values(map));
+      document.getElementById('impactHeatmap').innerHTML = impacts.map(i => {
+        const c = map[i] || 0;
+        const opacity = 0.08 + (c / max) * 0.35;
+        return `<div class="heat-cell" style="background:rgba(102,126,234,${opacity})"><span>${escapeHtml(i)}</span><strong>${c}</strong></div>`;
+      }).join('');
+    }
+
+    let selectedTradeForMenu = '';
+
+    function renderTradeMenu(data) {
+      const tradeMap = {};
+      data.forEach(l => (l.trade || []).forEach(t => {
+        if (!tradeMap[t]) tradeMap[t] = [];
+        tradeMap[t].push(l);
+      }));
+
+      const trades = Object.keys(tradeMap).sort((a,b) => tradeMap[b].length - tradeMap[a].length || a.localeCompare(b));
+      if (!trades.length) {
+        document.getElementById('tradeLessonList').innerHTML = '<div style="padding:20px; color:var(--muted); text-align:center;">No trades found</div>';
+        document.getElementById('tradeLessonDetail').innerHTML = '';
+        return;
+      }
+
+      if (!selectedTradeForMenu || !tradeMap[selectedTradeForMenu]) selectedTradeForMenu = trades[0];
+      
+      document.getElementById('tradeLessonList').innerHTML = trades.map(t => `
+        <button class="trade-item${t === selectedTradeForMenu ? ' active' : ''}" onclick="selectTradeMenu('${escapeHtml(t).replace(/'/g,"\\'")}')">
+          <span>${escapeHtml(t)}</span>
+          <span>${tradeMap[t].length}</span>
+        </button>
+      `).join('');
+
+      const selectedLessons = tradeMap[selectedTradeForMenu] || [];
+      document.getElementById('tradeLessonDetail').innerHTML = `
+        <h3>${escapeHtml(selectedTradeForMenu)}</h3>
+        <p style="margin:0 0 8px; color:var(--muted); font-size:12px; line-height:1.35;">Use this before pricing, sending supplier inquiries, reviewing quotes, or preparing RFIs for this trade.</p>
+        ${selectedLessons.map(l => `
+          <div class="trade-summary-item">
+            <strong>${escapeHtml(l.lessonLearned)}</strong>
+            <p><b>Action:</b> ${escapeHtml(l.toBeDone)}</p>
+            <p><b>Root Cause:</b> ${escapeHtml(l.rootCause || '-')} | <b>Project:</b> ${escapeHtml(l.projectName || '-')}</p>
+          </div>
+        `).join('')}
+      `;
+    }
+
+    function selectTradeMenu(trade) {
+      selectedTradeForMenu = trade;
+      render();
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('lessonTable');
+      const empty = document.getElementById('emptyState');
+      tbody.innerHTML = data.map(l => `
+        <tr>
+          <td>${l.date || ''}</td>
+          <td>${(l.category || []).join(', ')}</td>
+          <td><span class="pill">${l.impactLevel || ''}</span></td>
+          <td><strong>${escapeHtml(l.lessonLearned || '')}</strong></td>
+          <td>${escapeHtml(l.whyLesson || '')}</td>
+          <td>${escapeHtml(l.toBeDone || '')}</td>
+          <td>${escapeHtml(l.projectName || '')}</td>
+          <td>${l.fitoutType || ''}</td>
+          <td>${l.projectType || ''}</td>
+          <td>${l.source || ''}</td>
+          <td>${(l.tags || []).map(t => `<span class="pill">${escapeHtml(t)}</span>`).join('')}</td>
+          <td>${(l.trade || []).join(', ')}</td>
+          <td>${l.rootCause || ''}</td>
+          <td>${l.status || ''}</td>
+          <td>${l.responsible || ''}</td>
+          <td>
+            <div class="actions">
+              <button class="icon-btn blue" onclick="editLesson('${l.id}')">✏️</button>
+              <button class="icon-btn danger" onclick="deleteLesson('${l.id}')">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+      empty.style.display = data.length ? 'none' : 'block';
+    }
+
+    // ===== SELECT POPULATION =====
+    function populateAllSelects() {
+      fillSelect('categoryFilter', options.category, true);
+      fillSelect('impactFilter', options.impactLevel, true);
+      fillSelect('fitoutTypeFilter', options.fitoutType, true);
+      fillSelect('projectTypeFilter', options.projectType, true);
+      fillSelect('sourceFilter', options.source, true);
+      fillSelect('tradeFilter', options.trade, true);
+      fillSelect('tagFilter', options.tags, true);
+      fillSelect('rootCauseFilter', options.rootCause, true);
+      fillSelect('phaseFilter', options.phase, true);
+      fillSelect('statusFilter', options.status, true);
+      fillSelect('responsibleFilter', options.responsible, true);
+    }
+
+    // ===== INITIALIZATION =====
+    loadLessons();
     populateAllSelects();
+    renderFormSelects();
     render();
   </script>
 </body>
